@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>HTML5 Canvas</h1>
+
+<canvas id="myCanvas" width="200" height="100" style="border:1px solid grey;"></canvas>
+
+<script>
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+
+ctx.fillStyle = "#FF0000";
+ctx.fillRect(0,0,150,75);
+
+
+const rectangle1 = {x:0, y:0, L: 50, H: 100};
+const rectangle2 = {x:0, y:0, L: 50, H: 50};
+
+
+function myFunction(o1, o2) {
+  return o1.H + o2.H;
+}
+
+
+
+
+//console.log car.H
+console.log("Hello world!", rectangle1.H,  myFunction(rectangle1, rectangle2));
+
+
+
+
+
+</script>
+
+</body>
+</html>
+
