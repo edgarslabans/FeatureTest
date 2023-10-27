@@ -27,7 +27,7 @@ canvas {
 
 <canvas id="canvas" width=300 height=300></canvas
 
-
+ <div id='info'></div>
 
 
 
@@ -44,6 +44,7 @@ var ctx = canvas.getContext("2d");
 ctx.strokeStyle = "lightgray";
 
 
+
 var canvasOffset = $("#canvas").offset();
 var offsetX = canvasOffset.left;
 var offsetY = canvasOffset.top;
@@ -55,25 +56,28 @@ var lastY = 0;
 var ships = [];
 
 
+var t_hout = 44 // thickness of the wood elements
+
+
+
 // output for iterations
 
-//document.getElementById("demo").innerHTML = txt;
+var txt = document.getElementById("demo");
 
 
 
 
 
-function myFunction() {
+function myFunction2() {
 
-  //document.getElementById("demo").innerHTML = "Hello World";
+  txt = "Hello World";
   
-	  ships.forEach(function (arrayItem) {
+	ships.forEach(function (arrayItem) {
 		var x = arrayItem.x;
 		console.log("ee", arrayItem.x,arrayItem.y,arrayItem.width);
 	});
 	
   makeShip(50, 50, 30, 30, "yellow");
-  
 }
 
 
@@ -82,14 +86,14 @@ function myFunction() {
 
 
 // make some ship
-makeShip(20, 30, 150, 150, "green");
-makeShip(20, 100, 30, 25, "skyblue");
-makeShip(20, 170, 50, 25, "salmon");
-makeShip(20, 240, 30, 25, "blue");
+makeShip(20, 30, 150, 150, "green", false);
+makeShip(20, 100, 30, 25, "skyblue",true);
+makeShip(20, 170, 50, 25, "salmon",true);
+makeShip(20, 240, 30, 25, "blue",true);
 
 
 
-function makeShip(x, y, width, height, fill) {
+function makeShip(x, y, width, height, fill, movable) {
     var ship = {
         x: x,
         y: y,
@@ -97,7 +101,8 @@ function makeShip(x, y, width, height, fill) {
         height: height,
         right: x + width,
         bottom: y + height,
-        fill: fill
+        fill: fill,
+		movable: movable
     }
     ships.push(ship);
     return (ship);
@@ -140,7 +145,8 @@ function handleMouseDown(e) {
 function handleMouseUp(e) {
     mouseX = parseInt(e.clientX - offsetX);
     mouseY = parseInt(e.clientY - offsetY);
-
+	
+	
     // mouseup stuff here
     mouseIsDown = false;
 }
@@ -152,31 +158,66 @@ function handleMouseMove(e) {
 
     mouseX = parseInt(e.clientX - offsetX);
     mouseY = parseInt(e.clientY - offsetY);
+	
 
     // mousemove stuff here
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i];
         drawShip(ship);
         if (ctx.isPointInPath(lastX, lastY)) {
+		
+			if (i>0) {
             ship.x += (mouseX - lastX);
             ship.y += (mouseY - lastY);
             ship.right = ship.x + ship.width;
             ship.bottom = ship.y + ship.height;
+			}
+			
+			
         }
     }
     lastX = mouseX;
     lastY = mouseY;
+	
+
     drawAllShips();
 }
 
 
-function intersectingRect(r1,r2){
-  var x=Math.max(r1.x,r2.x);
-  var y=Math.max(r1.y,r2.y);
-  var xx=Math.min(r1.x+r1.w,r2.x+r2.w);
-  var yy=Math.min(r1.y+r1.h,r2.y+r2.h);
-  return({x:x,y:y,w:xx-x,h:yy-y});
+
+
+//function attached to button
+function myFunction() {
+
+
+   document.getElementById("demo").innerHTML = overlappingArea(ships[0], ships[1])
 }
+
+
+// calculating the overlapping between two objects
+function overlappingArea(first,second )
+{
+	let A1 = first.width * first.height
+	let A2 = second.width * second.height
+
+	let intersecting_area  = 
+	Math.max(0, Math.min(second.right, first.right) - 
+	Math.max(second.x, first.x)) * 
+	Math.max(0, Math.min(second.bottom, first.bottom) - 
+	Math.max(second.y, first.y))
+
+	let percent_coverage = intersecting_area/A2
+
+	//console.log(A1, A2, intersecting_area, percent_coverage)
+    return ( intersecting_area + "; " +percent_coverage )
+}
+ 
+
+
+
+
+
+
 
 
 
@@ -184,6 +225,7 @@ $("#canvas").mousedown(function (e) {
     handleMouseDown(e);
 });
 $("#canvas").mousemove(function (e) {
+	myFunction();
     handleMouseMove(e);
 });
 $("#canvas").mouseup(function (e) {
@@ -193,5 +235,7 @@ $("#canvas").mouseup(function (e) {
 
 
 </script>
+
+
 
 
