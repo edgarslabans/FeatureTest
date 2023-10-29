@@ -30,6 +30,28 @@ canvas {
  <div id='info'></div>
 
 
+   <table id="myTable">
+      <thead>
+         <th> x </th>
+         <th> y </th>
+         <th> b </th>
+		 <th> h </th>
+      </thead>
+      <tbody>
+         <tr>
+            <td contenteditable='true'> 66 </td>
+            <td contenteditable='true'> 66 </td>
+            <td contenteditable='true'> 66 </td>
+			<td contenteditable='true'><input type="text"  value="66" class="border-none">  </td>
+         </tr>
+
+      </tbody>
+   </table>
+
+
+
+
+
 
 
 </body>
@@ -77,12 +99,45 @@ function myFunction2() {
 		console.log("ee", arrayItem.x,arrayItem.y,arrayItem.width);
 	});
 	
-  makeShip(50, 50, 30, 30, "yellow");
+  makeShip(250, 250, 30, 30, "yellow");
 }
 
+function addRow(x,y,b,h) {
+      // Get the table element in which you want to add row
+      let table = document.getElementById("myTable");
+   
+      // Create a row using the inserRow() method and
+      // specify the index where you want to add the row
+      let row = table.insertRow(-1); // We are adding at the end
+   
+      // Create table cells
+      let c1 = row.insertCell(0);
+      let c2 = row.insertCell(1);
+      let c3 = row.insertCell(2);
+	  let c4 = row.insertCell(3);
+   
+      // Add data to c1 and c2
+      c1.innerText = x
+      c2.innerText = y
+      c3.innerText = b
+	  c3.innerText = h
+   }
 
+    function addNewRow(x,y,b,h) {
 
+        var table = document.getElementById(myTable);
 
+        var row = document.createElement('tr');
+        var data = document.createElement('td');
+        var tbx = document.createElement('input');
+        tbx.setAttribute('type', 'text');
+
+        data.appendChild(tbx);
+
+        row.appendChild(data);
+        table.appendChild(row);
+
+    }
 
 
 // make some ship
@@ -105,6 +160,7 @@ function makeShip(x, y, width, height, fill, movable) {
 		movable: movable
     }
     ships.push(ship);
+	addRow(x,y,width, height); // test
     return (ship);
 }
 
@@ -210,6 +266,10 @@ function myFunction() {
 // calculating the overlapping between two objects
 function overlappingArea(first,second )
 {
+
+	 makeShip(250, 250, 30, 30, "yellow");
+
+
 	let A1 = first.width * first.height
 	let A2 = second.width * second.height
 	
@@ -232,6 +292,8 @@ function overlappingArea(first,second )
  	let total = A1- intersecting_area
 	
 	let  percentage = A_hout/total
+	
+	
 
 	//console.log(A1, A2, intersecting_area, percent_coverage)
     return ( "Total: " + A1 + " Sandwich: " +  total + " A_hout: " + A_hout + " percentage: "  + percentage.toFixed(4))
