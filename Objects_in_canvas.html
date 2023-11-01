@@ -7,10 +7,10 @@
 <head>
 <style>
 body {
-    background-color: ivory;
+    background-color: white;
 }
 canvas {
-    border:1px solid red;
+    border:1px solid grey;
 }
 </style>
 </head>
@@ -25,7 +25,7 @@ canvas {
 <p id="demo"> Total Area </p>
 
 
-<canvas id="canvas" width=300 height=300></canvas
+<canvas id="canvas" width=500 height=300></canvas
 
  <div id='info'></div>
 
@@ -39,20 +39,13 @@ canvas {
       </thead>
       <tbody>
          <tr>
-            <td contenteditable='true'> 66 </td>
-            <td contenteditable='true'> 66 </td>
-            <td contenteditable='true'> 66 </td>
-			<td contenteditable='true'><input type="text"  value="66" class="border-none">  </td>
+
          </tr>
 
       </tbody>
    </table>
 
-
-
-
-
-
+<button onclick="add_opening()">Add opening</button>
 
 </body>
 
@@ -83,24 +76,26 @@ var t_hout = 4.4 // thickness of the wood elements
 
 
 // output for iterations
-
 var txt = document.getElementById("demo");
 
 
 
 
+function add_opening(x,y, b,h, col, movable){
 
-function myFunction2() {
-
-  txt = "Hello World";
-  
-	ships.forEach(function (arrayItem) {
-		var x = arrayItem.x;
-		console.log("ee", arrayItem.x,arrayItem.y,arrayItem.width);
-	});
-	
-  makeShip(250, 250, 30, 30, "yellow");
+	makeShip(x, y, b, h, col, movable);
+	addRow (x, y, b,h );
 }
+
+function update_table(){
+
+
+
+}
+
+
+
+
 
 function addRow(x,y,b,h) {
       // Get the table element in which you want to add row
@@ -109,42 +104,91 @@ function addRow(x,y,b,h) {
       // Create a row using the inserRow() method and
       // specify the index where you want to add the row
       let row = table.insertRow(-1); // We are adding at the end
+	  
    
       // Create table cells
       let c1 = row.insertCell(0);
+	  c1.setAttribute("contenteditable", "true");
+	  //c1.setAttribute("id", "input");
+	  c1.setAttribute("onkeyup", "update_obj(1)");
+	  
+	  
       let c2 = row.insertCell(1);
+	  c2.setAttribute("contenteditable", "true");
+	  
       let c3 = row.insertCell(2);
+	  c3.setAttribute("contenteditable", "true"); 
+	  
 	  let c4 = row.insertCell(3);
-   
+	  c4.setAttribute("contenteditable", "true"); 
+	  
+	  
       // Add data to c1 and c2
       c1.innerText = x
       c2.innerText = y
       c3.innerText = b
-	  c3.innerText = h
+	  c4.innerText = h
    }
+   
 
-    function addNewRow(x,y,b,h) {
 
-        var table = document.getElementById(myTable);
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+ 
 
-        var row = document.createElement('tr');
-        var data = document.createElement('td');
-        var tbx = document.createElement('input');
-        tbx.setAttribute('type', 'text');
+    function update_obj(num) {
+	
+	var table = document.getElementById('myTable')
 
-        data.appendChild(tbx);
+	// Access the second row (index 1) in the first column (index 0) in the tbody
+	var tbody = table.getElementsByTagName("tbody")[0];
+	var row = tbody.getElementsByTagName("tr")[num+1]; // Get the second row
+	var cell = row.getElementsByTagName("td")[2]; // Get the first cell (index 0)
 
-        row.appendChild(data);
-        table.appendChild(row);
+	ships[num].width = parseInt(cell.innerHTML); // 80 //cell.innerHTML 
+	console.log("Obj update with new width", cell.innerHTML, ships[num].width)
+	
+	//drawAllShips();
+	
+	drawShip(ships[num]);
 
     }
 
 
 // make some ship
-makeShip(20, 30, 200, 200, "green", false);
-makeShip(20, 100, 30, 25, "skyblue",true);
-makeShip(20, 170, 50, 25, "salmon",true);
-makeShip(20, 240, 30, 25, "blue",true);
+
+add_opening(20, 30, 280, 200, "DarkSeaGreen", false)
+add_opening(100, 50, 80, 150, "ivory",true)
+
+
+function delay(callback, ms) {
+  var timer = 0;
+  return function() {
+    var context = this, args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      callback.apply(context, args);
+    }, ms || 0);
+  };
+}
+
+$('#input').keyup(delay(function (e) {
+  console.log('Time elapsed!', this.value);
+}, 500));
+
+
+
+
 
 
 
@@ -160,11 +204,17 @@ function makeShip(x, y, width, height, fill, movable) {
 		movable: movable
     }
     ships.push(ship);
-	addRow(x,y,width, height); // test
+
     return (ship);
 }
 
+
+
 drawAllShips();
+
+
+
+
 
 function drawAllShips() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -267,8 +317,8 @@ function myFunction() {
 function overlappingArea(first,second )
 {
 
-	 makeShip(250, 250, 30, 30, "yellow");
-
+	 //makeShip(250, 250, 30, 30, "yellow");
+	update_obj(1);
 
 	let A1 = first.width * first.height
 	let A2 = second.width * second.height
