@@ -21,6 +21,7 @@ canvas {
 
 
 <button onclick="myFunction()">Click me</button>
+<button onclick="check_properties()">Check properties</button>
 
 <p id="demo"> Total Area </p>
 
@@ -81,16 +82,41 @@ var txt = document.getElementById("demo");
 
 
 
-function add_opening(x,y, b,h, col, movable){
+function add_initial_opening(x,y, b,h, col, movable){
 
 	makeShip(x, y, b, h, col, movable);
 	addRow (x, y, b,h );
+	drawAllShips();
 }
 
-function update_table(){
+
+function add_opening(){
+
+	add_initial_opening(Math.round(0+Math.random()*100), Math.round(0+Math.random()*100), 80, 150, "ivory",true)
+	//addRow (100, 50, 80, 150);
+}
 
 
 
+
+
+function check_properties(){
+
+//console.log("s0", ships[0].x,ships[0].y,ships[0].width,ships[0].height)
+//console.log("s1", ships[1].x,ships[1].y,ships[1].width,ships[1].height)
+
+
+ships[1].width = 120
+
+///const canvas = document.getElementById("canvas");
+//const ctx = canvas.getContext("2d");
+//ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+ctx.fillStyle = "grey";
+ctx.fillRect(0,0,150,75);
+
+
+//drawAllShips();
 }
 
 
@@ -118,9 +144,11 @@ function addRow(x,y,b,h) {
 	  
       let c3 = row.insertCell(2);
 	  c3.setAttribute("contenteditable", "true"); 
+	  c3.setAttribute("onkeyup", "update_obj(1)");
 	  
 	  let c4 = row.insertCell(3);
 	  c4.setAttribute("contenteditable", "true"); 
+	  c4.setAttribute("onkeyup", "update_obj(1)");
 	  
 	  
       // Add data to c1 and c2
@@ -129,46 +157,41 @@ function addRow(x,y,b,h) {
       c3.innerText = b
 	  c4.innerText = h
    }
-   
 
 
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
- 
+
 
     function update_obj(num) {
 	
-	var table = document.getElementById('myTable')
+		var table = document.getElementById('myTable')
 
-	// Access the second row (index 1) in the first column (index 0) in the tbody
-	var tbody = table.getElementsByTagName("tbody")[0];
-	var row = tbody.getElementsByTagName("tr")[num+1]; // Get the second row
-	var cell = row.getElementsByTagName("td")[2]; // Get the first cell (index 0)
+		// Access the second row (index 1) in the first column (index 0) in the tbody
+		var tbody = table.getElementsByTagName("tbody")[0];
+		var row = tbody.getElementsByTagName("tr")[num+1]; // Get the second row
+		var cell = row.getElementsByTagName("td")[2]; // Get the first cell (index 0)
 
-	ships[num].width = parseInt(cell.innerHTML); // 80 //cell.innerHTML 
-	console.log("Obj update with new width", cell.innerHTML, ships[num].width)
+
+		console.log("Updating object width", cell.innerHTML, " old val: ", ships[num].width)
+		ships[num].width = parseInt(cell.innerHTML); // 80 //cell.innerHTML 
+		
+		// Clear the canvas
+    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+		
+		//drawAllShips();
+		
 	
-	//drawAllShips();
-	
-	drawShip(ships[num]);
 
     }
 
 
+
+
+
+
 // make some ship
 
-add_opening(20, 30, 280, 200, "DarkSeaGreen", false)
-add_opening(100, 50, 80, 150, "ivory",true)
+add_initial_opening(20, 30, 280, 200, "DarkSeaGreen", false)  // base
+add_initial_opening(100, 50, 80, 150, "ivory",true)
 
 
 function delay(callback, ms) {
@@ -185,9 +208,6 @@ function delay(callback, ms) {
 $('#input').keyup(delay(function (e) {
   console.log('Time elapsed!', this.value);
 }, 500));
-
-
-
 
 
 
@@ -209,22 +229,25 @@ function makeShip(x, y, width, height, fill, movable) {
 }
 
 
-
 drawAllShips();
 
 
 
-
-
 function drawAllShips() {
+
+	
+	
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
+		console.log("drawing ship ",i,ship.width, ship.height )
+		
         drawShip(ship);
         ctx.fillStyle = ship.fill;
         ctx.fill();
         ctx.stroke();
 		ctx.lineWidth = t_hout;
+		
     }
 }
 
@@ -359,7 +382,6 @@ $("#canvas").mousedown(function (e) {
     handleMouseDown(e);
 });
 $("#canvas").mousemove(function (e) {
-	//myFunction();
     handleMouseMove(e);
 });
 $("#canvas").mouseup(function (e) {
