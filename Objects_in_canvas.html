@@ -116,7 +116,7 @@ ctx.fillStyle = "grey";
 ctx.fillRect(0,0,150,75);
 
 
-drawAllShips();
+//drawAllShips();
 }
 
 
@@ -131,24 +131,26 @@ function addRow(x,y,b,h) {
       // specify the index where you want to add the row
       let row = table.insertRow(-1); // We are adding at the end
 	  
+      console.log("table len ", table.rows.length)
+      
    
       // Create table cells
       let c1 = row.insertCell(0);
 	  c1.setAttribute("contenteditable", "true");
-	  //c1.setAttribute("id", "input");
-	  c1.setAttribute("onkeyup", "update_obj(1)");
+	  c1.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
 	  
       let c2 = row.insertCell(1);
-	  c2.setAttribute("contenteditable", "true");
+      c2.setAttribute("contenteditable", "true"); 
+	  c2.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
       let c3 = row.insertCell(2);
 	  c3.setAttribute("contenteditable", "true"); 
-	  c3.setAttribute("onkeyup", "update_obj(1)");
+	  c3.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
 	  let c4 = row.insertCell(3);
 	  c4.setAttribute("contenteditable", "true"); 
-	  c4.setAttribute("onkeyup", "update_obj(1)");
+	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
 	  
       // Add data to c1 and c2
@@ -162,22 +164,33 @@ function addRow(x,y,b,h) {
 
 
     function update_obj(num) {
+    
+    console.log("update called with arg", num)
 	
 		var table = document.getElementById('myTable')
 
 		// Access the second row (index 1) in the first column (index 0) in the tbody
 		var tbody = table.getElementsByTagName("tbody")[0];
 		var row = tbody.getElementsByTagName("tr")[num+1]; // Get the second row
-		var cell = row.getElementsByTagName("td")[2]; // Get the first cell (index 0)
+		
+        var x_t = row.getElementsByTagName("td")[0];
+        var y_t = row.getElementsByTagName("td")[1];
+        
+        var width_t = row.getElementsByTagName("td")[2]; 
+        var height_t = row.getElementsByTagName("td")[3]; 
 
 
-		console.log("Updating object width", cell.innerHTML, " old val: ", ships[num].width)
-		ships[num].width = parseInt(cell.innerHTML); // 80 //cell.innerHTML 
+		//console.log("Updating object width", cell.innerHTML, " old val: ", ships[num].width)
 		
-		// Clear the canvas
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ships[num].x = parseInt(x_t.innerHTML); // 80 //cell.innerHTML 
+        ships[num].y = parseInt(y_t.innerHTML); // 80 //cell.innerHTML 
+        
+        ships[num].width = parseInt(width_t.innerHTML); // 80 //cell.innerHTML 
+        ships[num].height = parseInt(height_t.innerHTML);
 		
-		//drawAllShips();
+
+		
+		drawAllShips();
 		
 	
 
@@ -391,7 +404,6 @@ $("#canvas").mouseup(function (e) {
 
 
 </script>
-
 
 
 
