@@ -73,6 +73,7 @@ var ships = [];
 
 
 var t_hout = 4.4 // thickness of the wood elements
+var b_panel = 50 // width of the panel
 
 
 
@@ -92,8 +93,10 @@ function add_initial_opening(x,y, b,h, col, movable){
 
 function add_opening(){
 
-	add_initial_opening(Math.round(0+Math.random()*100), Math.round(0+Math.random()*100), 80, 150, "ivory",true)
+	add_initial_opening( ships[ships.length - 1].x + ships[ships.length - 1].width+60, Math.round(0+Math.random()*100), 80, 150, "ivory",true)
 	//addRow (100, 50, 80, 150);
+	
+
 }
 
 
@@ -150,6 +153,10 @@ function addRow(x,y,b,h) {
 	  
 	  let c4 = row.insertCell(3);
 	  c4.setAttribute("contenteditable", "true"); 
+	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
+	  
+	  let c4 = row.insertCell(3);
+
 	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
 	  
@@ -245,34 +252,80 @@ function makeShip(x, y, width, height, fill, movable) {
 drawAllShips();
 
 
+// ========================== DRAWING =============================
 
+// drawing all objects in canvas
 function drawAllShips() {
 
-	
-	
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
-		console.log("drawing ship ",i,ship.width, ship.height )
-		
+
         drawShip(ship);
-        ctx.fillStyle = ship.fill;
-        ctx.fill();
-        ctx.stroke();
-		ctx.lineWidth = t_hout;
 		
+		// adding vertical lines for each opening
+		ctx.fillStyle = "DarkOrange";
+		ctx.fillRect(ship.x-t_hout/2,  ships[0].y, t_hout*2, ships[0].height);
+		ctx.fillRect(ship.x + ship.width - t_hout * 1.5 ,  ships[0].y, t_hout*2, ships[0].height);
+		
+
+		//draw_panel_connections();
+		
+		
+		// filling the opening
+		ctx.fillStyle = ship.fill;
+		ctx.fill();
+		ctx.stroke();
+		ctx.strokeStyle = "LightSalmon";
+		ctx.lineWidth = t_hout;
     }
 }
 
+function draw_panel_connections(){
+		if ( ships.length >1  ){
+		
+
+			for (var i = 0; i < ships.length-1; i++) {
+			
+			
+			
+				if ( (ships[i+1].x  - (ships[i].x+ ships[i].width)  >  b_panel)     ){
+					for (var i = 0; i < Math.floor( (ships[i+1].x  - (ships[i].x+ ships[i].width))/b_panel); i++)      {
+						ctx.fillStyle = "DarkOrange";
+						ctx.fillRect(ships[i].x+ ships[i].width + b_panel* (i+1),  ships[0].y, t_hout*2, ships[0].height);
+					}
+				}
+			}
+			
+		
+		}
+		
+		
+}
+
+
+
+
+
+
+// drawing each ship
 function drawShip(ship) {
-       ctx.beginPath();
+
+	  ctx.beginPath();
       ctx.moveTo(ship.x, ship.y);
       ctx.lineTo(ship.x + ship.width, ship.y);
       ctx.lineTo(ship.x + ship.width + 0, ship.y + ship.height / 2);
       ctx.lineTo(ship.x + ship.width, ship.y + ship.height);
       ctx.lineTo(ship.x, ship.y + ship.height);
       ctx.closePath();
+	  
+	  
 }
+
+
+// ========================== MOUSE MOVEMENT =============================
+
 
 function handleMouseDown(e) {
     mouseX = parseInt(e.clientX - offsetX);
@@ -292,7 +345,18 @@ function handleMouseUp(e) {
 	
     // mouseup stuff here
     mouseIsDown = false;
+	//console.log("m up")
+	
 }
+
+
+function update_table_after_move(){
+
+
+
+}
+
+
 
 function handleMouseMove(e) {
     if (!mouseIsDown) {
@@ -404,6 +468,5 @@ $("#canvas").mouseup(function (e) {
 
 
 </script>
-
 
 
