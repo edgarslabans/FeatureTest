@@ -155,9 +155,6 @@ function addRow(x,y,b,h) {
 	  c4.setAttribute("contenteditable", "true"); 
 	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
-	  let c4 = row.insertCell(3);
-
-	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 
 
 	  // Create a cell for the "Delete" button
@@ -182,7 +179,12 @@ function addRow(x,y,b,h) {
     let table = document.getElementById("myTable");
     let rowIndex = row.rowIndex;
     table.deleteRow(rowIndex);
-    // You can perform any additional actions or updates here.
+	
+	
+    ships.splice(rowIndex-1, 1);  // does not work
+	
+	console.log("ships len", ships.length)
+	drawAllShips();
   }
 
 
@@ -484,5 +486,4 @@ $("#canvas").mouseup(function (e) {
 
 
 </script>
-
 
