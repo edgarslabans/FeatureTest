@@ -162,7 +162,7 @@ function addRow(x,y,b,h) {
 	  let deleteButton = document.createElement("button");
 	  deleteButton.innerText = "Delete";
 	  deleteButton.addEventListener("click", function () {
-	    deleteRow(row);
+	    deleteRow(table.rows.length - 3);
 	  });
 	  deleteCell.appendChild(deleteButton);
 
@@ -175,16 +175,18 @@ function addRow(x,y,b,h) {
 	  c4.innerText = h
    }
 
-  function deleteRow(row) {
+  function deleteRow() {
+
     let table = document.getElementById("myTable");
-    let rowIndex = row.rowIndex;
-    table.deleteRow(rowIndex);
-	
-	
-    ships.splice(rowIndex-1, 1);  // does not work
-	
-	console.log("ships len", ships.length)
-	drawAllShips();
+    let tbody = table.getElementsByTagName("tbody")[0];
+
+    // Remove the corresponding ship from the ships array
+    ships.splice(index, 1);
+
+    // Remove the corresponding row from the table
+    tbody.removeChild(tbody.childNodes[index + 1]); 
+
+    drawAllShips();
   }
 
 
@@ -275,7 +277,7 @@ drawAllShips();
 // drawing all objects in canvas
 function drawAllShips() {
 
-
+	//console.log('Redrawing ships: ', ships.length);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
@@ -486,4 +488,3 @@ $("#canvas").mouseup(function (e) {
 
 
 </script>
-
