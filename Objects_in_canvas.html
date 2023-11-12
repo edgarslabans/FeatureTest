@@ -20,7 +20,7 @@ canvas {
 <p>Hit testing uses context.isPointInPath</p>
 
 
-<button onclick="myFunction()">Click me</button>
+<button onclick="UpdateResults()">Click me</button>
 <button onclick="check_properties()">Check properties</button>
 
 <p id="demo"> Total Area </p>
@@ -93,10 +93,14 @@ function add_initial_opening(x,y, b,h, col, movable){
 
 function add_opening(){
 
-	add_initial_opening( ships[ships.length - 1].x + ships[ships.length - 1].width+60, Math.round(0+Math.random()*100), 80, 150, "ivory",true)
-	//addRow (100, 50, 80, 150);
-	
+	if (ships.length > 1){
 
+		add_initial_opening( ships[ships.length - 1].x + ships[ships.length - 1].width+20,  ships[ships.length - 1].y, 80, 150, "ivory",true);
+		//addRow (100, 50, 80, 150)
+	} else {
+		add_initial_opening(30, Math.round(0+Math.random()*100), 80, 150, "ivory",true);
+	}
+	UpdateResults();
 }
 
 
@@ -155,19 +159,19 @@ function addRow(x,y,b,h) {
 	  c4.setAttribute("contenteditable", "true"); 
 	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
 	  
-
-
-	  // Create a cell for the "Delete" button
-	  let deleteCell = row.insertCell(4);
-	  let deleteButton = document.createElement("button");
-	  deleteButton.innerText = "Delete";
-	  deleteButton.addEventListener("click", function () {
-	    deleteRow(table.rows.length - 3);
-	  });
-	  deleteCell.appendChild(deleteButton);
+// Create a cell for the "Delete" button
+		if (ships.length >1) {
+		  
+		  let deleteCell = row.insertCell(4);
+		  let deleteButton = document.createElement("button");
+		  deleteButton.innerText = "Delete";
+		  deleteButton.addEventListener("click", function () {
+			deleteRow(row);
+		  });
+		  deleteCell.appendChild(deleteButton);
+	  }
 
 	
-	  
       // Add data to c1 and c2
       c1.innerText = x
       c2.innerText = y
@@ -175,24 +179,23 @@ function addRow(x,y,b,h) {
 	  c4.innerText = h
    }
 
-  function deleteRow() {
-
+  function deleteRow(row) {
     let table = document.getElementById("myTable");
-    let tbody = table.getElementsByTagName("tbody")[0];
-
-    // Remove the corresponding ship from the ships array
-    ships.splice(index, 1);
-
-    // Remove the corresponding row from the table
-    tbody.removeChild(tbody.childNodes[index + 1]); 
-
-    drawAllShips();
+    let rowIndex = row.rowIndex;
+    table.deleteRow(rowIndex);
+	
+	console.log("ships len", ships.length, "deleted", rowIndex , ships[rowIndex-2].x )
+    ships.splice(rowIndex-2, 1);  // does not work
+	
+	
+	drawAllShips();
   }
 
 
-    function update_obj(num) {
-    
-    console.log("update called with arg", num)
+
+	// changes the size or position of the opening by adjusting values in the table
+    function changeOpeningSizeOrPosition(num) {
+
 	
 		var table = document.getElementById('myTable')
 
@@ -202,28 +205,37 @@ function addRow(x,y,b,h) {
 		
         var x_t = row.getElementsByTagName("td")[0];
         var y_t = row.getElementsByTagName("td")[1];
-        
         var width_t = row.getElementsByTagName("td")[2]; 
         var height_t = row.getElementsByTagName("td")[3]; 
 
 
-		//console.log("Updating object width", cell.innerHTML, " old val: ", ships[num].width)
-		
-        ships[num].x = parseInt(x_t.innerHTML); // 80 //cell.innerHTML 
-        ships[num].y = parseInt(y_t.innerHTML); // 80 //cell.innerHTML 
-        
-        ships[num].width = parseInt(width_t.innerHTML); // 80 //cell.innerHTML 
+        ships[num].x = parseInt(x_t.innerHTML); 
+        ships[num].y = parseInt(y_t.innerHTML); 
+        ships[num].width = parseInt(width_t.innerHTML);
         ships[num].height = parseInt(height_t.innerHTML);
-		
 
-		
 		drawAllShips();
+		UpdateResults();
 		
-	
-
     }
 
+function updateTableAfterMove() {
+    // Iterate through each ship and update its corresponding table row
+   var table = document.getElementById("myTable");
+    if (table && table.rows.length >= ships.length) {
+        var tbody = table.getElementsByTagName("tbody")[0];
 
+        for (var i = 0; i < ships.length; i++) {
+            var ship = ships[i];
+            var row = tbody.rows[i+1];
+				
+			row.cells[0].innerText = ship.x;
+			row.cells[1].innerText = ship.y;
+			row.cells[2].innerText = ship.width;
+			row.cells[3].innerText = ship.height;
+        }
+    }
+}
 
 
 
@@ -277,7 +289,7 @@ drawAllShips();
 // drawing all objects in canvas
 function drawAllShips() {
 
-	//console.log('Redrawing ships: ', ships.length);
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
@@ -297,7 +309,10 @@ function drawAllShips() {
 		ctx.fillStyle = ship.fill;
 		ctx.fill();
 		ctx.stroke();
-		ctx.strokeStyle = "LightSalmon";
+		
+		ctx.strokeStyle = "DarkOrange";		//LightSalmon
+
+		
 		ctx.lineWidth = t_hout;
     }
 }
@@ -367,6 +382,9 @@ function handleMouseUp(e) {
     mouseIsDown = false;
 	//console.log("m up")
 	
+	updateTableAfterMove();
+	UpdateResults();
+	
 }
 
 
@@ -395,7 +413,6 @@ function handleMouseMove(e) {
 		
 			if (i>0) {
 			
-			
 			// restricting the movements of the squares inside the biggest one
 			if (ship.x > ships[0].x) {ship.x += (mouseX - lastX)} else {ship.x  = ships[0].x+1}
 			if (ship.y > ships[0].y) {ship.y += (mouseY - lastY)} else {ship.y  = ships[0].y+1}
@@ -411,8 +428,6 @@ function handleMouseMove(e) {
             ship.right = ship.x + ship.width;
             ship.bottom = ship.y + ship.height;
 			}
-			
-			
         }
     }
     lastX = mouseX;
@@ -426,19 +441,40 @@ function handleMouseMove(e) {
 
 
 //function attached to button
-function myFunction() {
+function UpdateResults() {
 
+   //document.getElementById("demo").innerHTML = overlappingArea(ships[0], ships[1])
+   let result = overlappingArea(ships[0],ships[1]);
+   
 
-   document.getElementById("demo").innerHTML = overlappingArea(ships[0], ships[1])
+	var canvas = document.getElementById("canvas");
+	const greenPixels = countPixelsByColor(canvas, "DarkSeaGreen");
+	const orangePixels = countPixelsByColor(canvas, "DarkOrange");
+	const edgeOpeningPixels = countPixelsByColor(canvas, "LightSalmon");
+	const openingPixels = countPixelsByColor(canvas, "ivory");
+	
+	var total_pix = greenPixels + orangePixels+ edgeOpeningPixels
+	
+	
+	
+	 document.getElementById("demo").innerHTML = "gr: " + greenPixels + " or: " + orangePixels + " edge: " + edgeOpeningPixels +  " op: " + openingPixels +
+        " Sandwich: " + (greenPixels/total_pix).toFixed(2) + " Timber Frame: " + (orangePixels/total_pix).toFixed(2)  + " Outside calc: " + ((openingPixels)/total_pix).toFixed(2);
+
+	// greenPixels
+	
+	console.log("Number of x pixels:", greenPixels);
+	
+	
+	
+	
+	
+
 }
 
 
 // calculating the overlapping between two objects
 function overlappingArea(first,second )
 {
-
-	 //makeShip(250, 250, 30, 30, "yellow");
-	update_obj(1);
 
 	let A1 = first.width * first.height
 	let A2 = second.width * second.height
@@ -470,6 +506,53 @@ function overlappingArea(first,second )
 }
  
 
+
+
+// Function to count pixels with a specified color
+function countPixelsByColor(canvas, colorName) {
+    const ctx = canvas.getContext("2d");
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    // Convert color name to RGB values
+    const color = getColorValues(colorName);
+
+    let pixelCount = 0;
+
+    // Loop through each pixel
+    for (let i = 0; i < data.length; i += 4) {
+        // Check if the pixel matches the specified color
+        if (
+            data[i] === color.red &&
+            data[i + 1] === color.green &&
+            data[i + 2] === color.blue
+        ) {
+            pixelCount++;
+        }
+    }
+
+    return pixelCount;
+}
+
+// Helper function to get RGB values from color name
+function getColorValues(colorName) {
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = tempCanvas.height = 1;
+    const tempCtx = tempCanvas.getContext("2d");
+
+    // Fill the canvas with the specified color
+    tempCtx.fillStyle = colorName;
+    tempCtx.fillRect(0, 0, 1, 1);
+
+    // Get the RGB values from the canvas
+    const pixelData = tempCtx.getImageData(0, 0, 1, 1).data;
+
+    return {
+        red: pixelData[0],
+        green: pixelData[1],
+        blue: pixelData[2],
+    };
+}
 
 
 
