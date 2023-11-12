@@ -465,46 +465,9 @@ function UpdateResults() {
 	console.log("Number of x pixels:", greenPixels);
 	
 	
-	
-	
-	
 
 }
 
-
-// calculating the overlapping between two objects
-function overlappingArea(first,second )
-{
-
-	let A1 = first.width * first.height
-	let A2 = second.width * second.height
-	
-	let A1_perimeter = (first.width + first.height)*2 // offset hout
-	let A2_perimeter = (second.width + second.height)*2 // offset hout
-	
-
-	let intersecting_area  = 
-	Math.max(0, Math.min(second.right, first.right) - 
-	Math.max(second.x, first.x)) * 
-	Math.max(0, Math.min(second.bottom, first.bottom) - 
-	Math.max(second.y, first.y))
-
-	let percent_coverage = intersecting_area/A2
-	
-	// timber frame area
-	let A_hout = A1_perimeter * t_hout + A2_perimeter * t_hout* (intersecting_area/A2)
-	
-	// totl wall area without windows
- 	let total = A1- intersecting_area
-	
-	let  percentage = A_hout/total
-	
-	
-
-	//console.log(A1, A2, intersecting_area, percent_coverage)
-    return ( "Total: " + A1 + " Sandwich: " +  total + " A_hout: " + A_hout + " percentage: "  + percentage.toFixed(4))
-}
- 
 
 
 
