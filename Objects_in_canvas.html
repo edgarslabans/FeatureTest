@@ -6,33 +6,69 @@
 
 <head>
 <style>
-body {
-    background-color: white;
-}
-canvas {
-    border:1px solid grey;
-}
-</style>
+        body {
+            background-color: white; /* Light gray background color */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+            padding: 20px; /* Add some padding for better aesthetics */
+        }
+		canvas {
+			border:1px solid grey;
+		}
+
+ table {
+            width: 100%;
+            max-width: 800px; /* Set a maximum width for the table */
+            margin-top: 20px; /* Add some margin at the top of the table */
+            background-color: white; /* White background for the table */
+            border-collapse: collapse; /* Collapse borders */
+        }
+
+        th, td {
+            border: 1px solid #dee2e6; /* Light gray border for table cells */
+            padding: 8px; /* Add padding to cells for better spacing */
+            text-align: center; /* Center-align text in cells */
+        }
+
+        th {
+            background-color: #f8f9fa; /* Light gray background for header cells */
+        }
+
+        button {
+            background-color: #007bff; /* Bootstrap primary blue color */
+            color: white;
+            border: none;
+            padding: 10px 20px; /* Add padding to the button */
+            cursor: pointer;
+            border-radius: 4px; /* Add a slight border-radius for a softer look */
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
 </head>
 
 <body>
-<p>Dragging ship drawings</p>
-<p>Hit testing uses context.isPointInPath</p>
 
 
-<button onclick="UpdateResults()">Click me</button>
-<button onclick="check_properties()">Check properties</button>
 
+
+<p><b>Simple timber volume</b> </p>
+
+
+<button onclick="UpdateResults()"> Test1</button>
+<button onclick="check_properties()">Test2</button>
+
+<p > Percentage </p>
 <p id="demo"> Total Area </p>
 
-
-<canvas id="canvas" width=500 height=300></canvas
+<canvas id="canvas" width=500 height=300></canvas>
 
  <div id='info'></div>
 
 
-   <table id="myTable">
-      <thead>
+   <table id="myTable" class="table table-bordered">
+      <thead class="thead-light">
          <th> x </th>
          <th> y </th>
          <th> b </th>
@@ -46,14 +82,19 @@ canvas {
       </tbody>
    </table>
 
-<button onclick="add_opening()">Add opening</button>
+    <div style="margin-bottom: 20px;"> </div>
+	<button onclick="add_opening()">Add opening</button>
 
 </body>
 
 </html>
 
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  
 <script type="text/javascript">
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -101,6 +142,7 @@ function add_opening(){
 		add_initial_opening(30, Math.round(0+Math.random()*100), 80, 150, "ivory",true);
 	}
 	UpdateResults();
+	draw_panel_connections();
 }
 
 
@@ -109,26 +151,13 @@ function add_opening(){
 
 function check_properties(){
 
-//console.log("s0", ships[0].x,ships[0].y,ships[0].width,ships[0].height)
-//console.log("s1", ships[1].x,ships[1].y,ships[1].width,ships[1].height)
-
-
-ships[1].width = 120
-
-///const canvas = document.getElementById("canvas");
-//const ctx = canvas.getContext("2d");
-//ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-ctx.fillStyle = "grey";
-ctx.fillRect(0,0,150,75);
-
-
-//drawAllShips();
+draw_panel_connections();
 }
 
 
 
 
+// add row in the table
 
 function addRow(x,y,b,h) {
       // Get the table element in which you want to add row
@@ -144,26 +173,28 @@ function addRow(x,y,b,h) {
       // Create table cells
       let c1 = row.insertCell(0);
 	  c1.setAttribute("contenteditable", "true");
-	  c1.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
+	  c1.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
 	  
 	  
       let c2 = row.insertCell(1);
       c2.setAttribute("contenteditable", "true"); 
-	  c2.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
+	  c2.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
 	  
       let c3 = row.insertCell(2);
 	  c3.setAttribute("contenteditable", "true"); 
-	  c3.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
+	  c3.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
 	  
 	  let c4 = row.insertCell(3);
 	  c4.setAttribute("contenteditable", "true"); 
-	  c4.setAttribute("onkeyup", "update_obj("+ String(table.rows.length-3) + ")");
+	  c4.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
 	  
 // Create a cell for the "Delete" button
 		if (ships.length >1) {
 		  
 		  let deleteCell = row.insertCell(4);
 		  let deleteButton = document.createElement("button");
+		  deleteButton.className = "btn btn-danger btn-sm"; 
+		  
 		  deleteButton.innerText = "Delete";
 		  deleteButton.addEventListener("click", function () {
 			deleteRow(row);
@@ -189,35 +220,37 @@ function addRow(x,y,b,h) {
 	
 	
 	drawAllShips();
+	draw_panel_connections();
   }
 
 
 
-	// changes the size or position of the opening by adjusting values in the table
-    function changeOpeningSizeOrPosition(num) {
+// changes the size or position of the opening by adjusting values in the table
+function changeOpeningSizeOrPosition(num) {
 
+	console.log("hiere", num)
+	var table = document.getElementById('myTable')
+
+	// Access the second row (index 1) in the first column (index 0) in the tbody
+	var tbody = table.getElementsByTagName("tbody")[0];
+	var row = tbody.getElementsByTagName("tr")[num+1]; // Get the second row
 	
-		var table = document.getElementById('myTable')
-
-		// Access the second row (index 1) in the first column (index 0) in the tbody
-		var tbody = table.getElementsByTagName("tbody")[0];
-		var row = tbody.getElementsByTagName("tr")[num+1]; // Get the second row
-		
-        var x_t = row.getElementsByTagName("td")[0];
-        var y_t = row.getElementsByTagName("td")[1];
-        var width_t = row.getElementsByTagName("td")[2]; 
-        var height_t = row.getElementsByTagName("td")[3]; 
+	var x_t = row.getElementsByTagName("td")[0];
+	var y_t = row.getElementsByTagName("td")[1];
+	var width_t = row.getElementsByTagName("td")[2]; 
+	var height_t = row.getElementsByTagName("td")[3]; 
 
 
-        ships[num].x = parseInt(x_t.innerHTML); 
-        ships[num].y = parseInt(y_t.innerHTML); 
-        ships[num].width = parseInt(width_t.innerHTML);
-        ships[num].height = parseInt(height_t.innerHTML);
+	ships[num].x = parseInt(x_t.innerHTML); 
+	ships[num].y = parseInt(y_t.innerHTML); 
+	ships[num].width = parseInt(width_t.innerHTML);
+	ships[num].height = parseInt(height_t.innerHTML);
 
-		drawAllShips();
-		UpdateResults();
-		
-    }
+	drawAllShips();
+	UpdateResults();
+	draw_panel_connections();
+	
+}
 
 function updateTableAfterMove() {
     // Iterate through each ship and update its corresponding table row
@@ -242,8 +275,10 @@ function updateTableAfterMove() {
 
 // make some ship
 
-add_initial_opening(20, 30, 280, 200, "DarkSeaGreen", false)  // base
-add_initial_opening(100, 50, 80, 150, "ivory",true)
+add_initial_opening(20, 30, 280, 200, "DarkSeaGreen", false);  // base
+add_initial_opening(40, 50, 80, 150, "ivory",true);
+add_initial_opening(200, 50, 80, 150, "ivory",true);
+draw_panel_connections();
 
 
 function delay(callback, ms) {
@@ -303,34 +338,79 @@ function drawAllShips() {
 		
 
 		//draw_panel_connections();
+
+
+		var edgeColor = "LightSalmon"  
+		
 		
 		
 		// filling the opening
 		ctx.fillStyle = ship.fill;
 		ctx.fill();
 		ctx.stroke();
-		
-		ctx.strokeStyle = "DarkOrange";		//LightSalmon
-
-		
+		ctx.strokeStyle = edgeColor;		//LightSalmon  // DarkOrange
 		ctx.lineWidth = t_hout;
+		
+		
+		
     }
+	
+	
 }
 
+
+// draw vertical connector bars if the distance between opening > panel width
 function draw_panel_connections(){
 		if ( ships.length >1  ){
 		
-
-			for (var i = 0; i < ships.length-1; i++) {
+		b_panel = 50;
+			//iterating all opening to check a distance between them
+			for (var i = 0; i < ships.length; i++) {
+				var dist = 0;
+				var connecting_bars = 0
 			
-			
-			
-				if ( (ships[i+1].x  - (ships[i].x+ ships[i].width)  >  b_panel)     ){
-					for (var i = 0; i < Math.floor( (ships[i+1].x  - (ships[i].x+ ships[i].width))/b_panel); i++)      {
+				// distance between the edge and the 1st opening
+				if (i==0){
+					dist = ships[i+1].x  - ships[i].x;
+					connecting_bars = Math.floor(dist/b_panel)
+					
+					for (var e = 0; e < connecting_bars; e++)      {
 						ctx.fillStyle = "DarkOrange";
-						ctx.fillRect(ships[i].x+ ships[i].width + b_panel* (i+1),  ships[0].y, t_hout*2, ships[0].height);
+						ctx.fillRect(ships[0].x + b_panel * (e+1), 
+						ships[0].y, t_hout*2, ships[0].height);
 					}
+					
+					
+					
 				}
+				// distance after the last opening
+				else if (i==ships.length-1){
+					dist = (ships[0].x+ships[0].width)  - (ships[i].x+ ships[i].width);
+					connecting_bars = Math.floor(dist/b_panel);
+					
+					for (var e = 0; e < connecting_bars; e++)      {
+						ctx.fillStyle = "DarkOrange";
+						ctx.fillRect(ships[i].x+ ships[i].width + b_panel * (e+1), 
+						ships[0].y, t_hout*2, ships[0].height);
+					}
+					
+					
+				}// the rest
+				else {
+					dist = ships[i+1].x  - (ships[i].x+ ships[i].width);
+					connecting_bars = Math.floor(dist/b_panel);
+					
+					
+					for (var e = 0; e < connecting_bars; e++)      {
+						ctx.fillStyle = "DarkOrange";
+						ctx.fillRect(ships[i].x+ ships[i].width + b_panel * (e+1), 
+						ships[0].y, t_hout*2, ships[0].height);
+					}
+					
+				}
+				
+				console.log(i,dist,connecting_bars )
+
 			}
 			
 		
@@ -338,6 +418,18 @@ function draw_panel_connections(){
 		
 		
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -382,6 +474,7 @@ function handleMouseUp(e) {
     mouseIsDown = false;
 	//console.log("m up")
 	
+	draw_panel_connections();
 	updateTableAfterMove();
 	UpdateResults();
 	
@@ -443,8 +536,7 @@ function handleMouseMove(e) {
 //function attached to button
 function UpdateResults() {
 
-   //document.getElementById("demo").innerHTML = overlappingArea(ships[0], ships[1])
-   let result = overlappingArea(ships[0],ships[1]);
+ 
    
 
 	var canvas = document.getElementById("canvas");
