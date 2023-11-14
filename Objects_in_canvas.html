@@ -1,101 +1,106 @@
 
-
-
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Timber Volume</title>
+    <style>
         body {
-            background-color: white; /* Light gray background color */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
-            padding: 20px; /* Add some padding for better aesthetics */
+            background-color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            margin: 0;
         }
-		canvas {
-			border:1px solid grey;
-		}
 
- table {
+        canvas {
+            border: 1px solid grey;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        table {
             width: 100%;
-            max-width: 800px; /* Set a maximum width for the table */
-            margin-top: 20px; /* Add some margin at the top of the table */
-            background-color: white; /* White background for the table */
-            border-collapse: collapse; /* Collapse borders */
+            max-width: 800px;
+            margin-top: 20px;
+            background-color: white;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
 
         th, td {
-            border: 1px solid #dee2e6; /* Light gray border for table cells */
-            padding: 8px; /* Add padding to cells for better spacing */
-            text-align: center; /* Center-align text in cells */
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
         }
 
         th {
-            background-color: #f8f9fa; /* Light gray background for header cells */
+            background-color: #f8f9fa;
         }
 
         button {
-            background-color: #007bff; /* Bootstrap primary blue color */
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px 20px; /* Add padding to the button */
+            padding: 10px 20px;
             cursor: pointer;
-            border-radius: 4px; /* Add a slight border-radius for a softer look */
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
 
         button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
+    <p style="font-size: 25px;"><b>Simple timber volume</b></p>
+
+    <div style="margin-bottom: 20px;">
+        Panel width:
+        <input type="number" id="panelWidthInput" value="1000" onchange="updateProjectProperties()">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        Wood thickness:
+        <input type="number" id="woodThicknessInput" value="44" onchange="updateProjectProperties()">
+    </div>
 
 
+    <p id="demo" style="font-size: 10px; color: gray;">Detailed results</p>
+    <p id="main_rez"> - </p>
 
+    <canvas id="canvas" width=600 height=400></canvas>
 
-<p><b>Simple timber volume</b> </p>
+    <table id="myTable" class="table table-bordered">
+        <thead class="thead-light">
+            <th>x</th>
+            <th>y</th>
+            <th>b</th>
+            <th>h</th>
+        </thead>
+        <tbody>
+            <tr></tr>
+        </tbody>
+    </table>
 
+    <button onclick="add_opening()">Add opening</button>
 
-<button onclick="UpdateResults()"> Test1</button>
-<button onclick="check_properties()">Test2</button>
-
-<p > Percentage </p>
-<p id="demo"> Total Area </p>
-
-<canvas id="canvas" width=500 height=300></canvas>
-
- <div id='info'></div>
-
-
-   <table id="myTable" class="table table-bordered">
-      <thead class="thead-light">
-         <th> x </th>
-         <th> y </th>
-         <th> b </th>
-		 <th> h </th>
-      </thead>
-      <tbody>
-         <tr>
-
-         </tr>
-
-      </tbody>
-   </table>
-
-    <div style="margin-bottom: 20px;"> </div>
-	<button onclick="add_opening()">Add opening</button>
-
-</body>
-
-</html>
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
-
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript">
   
-<script type="text/javascript">
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 ctx.strokeStyle = "lightgray";
@@ -113,49 +118,77 @@ var lastY = 0;
 var ships = [];
 
 
-var t_hout = 4.4 // thickness of the wood elements
-var b_panel = 50 // width of the panel
+var t_hout = 44 // thickness of the wood elements
+var b_panel = 1000 // width of the panel
 
-
-
-// output for iterations
 var txt = document.getElementById("demo");
 
+var c = 0.1		// reduction cof to fit shape in canvas
 
 
+ctx.translate(0, canvas.height);
+ctx.scale(1, -1);
 
-function add_initial_opening(x,y, b,h, col, movable){
 
-	makeShip(x, y, b, h, col, movable);
-	addRow (x, y, b,h );
-	drawAllShips();
+// show some elements 
+updateProjectProperties(); 
+launch_preconfigurated_element();
+
+
+function launch_preconfigurated_element(){
+
+
+// make some ship
+
+add_shape(200, 300, 4000, 2700, "DarkSeaGreen", false);  // base
+add_shape(660, 900, 800, 1500, "ivory",true);
+add_shape(2000, 900, 800, 1500, "ivory",true);
+
 }
 
 
+function add_shape(x,y, b,h, col, movable){
+
+	makeShip(x, y, b, h, col, movable);
+	addRow (x, y, b,h );
+	
+	drawAllShips();
+	draw_panel_connections();
+	UpdateResults();
+}
+
+
+// adding new opening by button click
 function add_opening(){
 
 	if (ships.length > 1){
 
-		add_initial_opening( ships[ships.length - 1].x + ships[ships.length - 1].width+20,  ships[ships.length - 1].y, 80, 150, "ivory",true);
+		add_shape( ships[ships.length - 1].x + ships[ships.length - 1].width+200,  
+		ships[ships.length - 1].y, 800, 1500, "ivory",true);
 		//addRow (100, 50, 80, 150)
 	} else {
-		add_initial_opening(30, Math.round(0+Math.random()*100), 80, 150, "ivory",true);
+		add_shape(300, 400, 800, 1500, "ivory",true);
 	}
-	UpdateResults();
-	draw_panel_connections();
+	
 }
 
-
+function updateProjectProperties() {
+    b_panel = parseInt(document.getElementById("panelWidthInput").value) || 0;
+    t_hout = parseInt(document.getElementById("woodThicknessInput").value) || 0;
+	
+    drawAllShips();
+    draw_panel_connections();
+	UpdateResults();
+}
 
 
 
 function check_properties(){
 
-draw_panel_connections();
+//draw_panel_connections();
+drawAllShips();
+
 }
-
-
-
 
 // add row in the table
 
@@ -167,9 +200,6 @@ function addRow(x,y,b,h) {
       // specify the index where you want to add the row
       let row = table.insertRow(-1); // We are adding at the end
 	  
-      console.log("table len ", table.rows.length)
-      
-   
       // Create table cells
       let c1 = row.insertCell(0);
 	  c1.setAttribute("contenteditable", "true");
@@ -188,7 +218,7 @@ function addRow(x,y,b,h) {
 	  c4.setAttribute("contenteditable", "true"); 
 	  c4.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
 	  
-// Create a cell for the "Delete" button
+		// Create a cell for the "Delete" button
 		if (ships.length >1) {
 		  
 		  let deleteCell = row.insertCell(4);
@@ -215,12 +245,13 @@ function addRow(x,y,b,h) {
     let rowIndex = row.rowIndex;
     table.deleteRow(rowIndex);
 	
-	console.log("ships len", ships.length, "deleted", rowIndex , ships[rowIndex-2].x )
-    ships.splice(rowIndex-2, 1);  // does not work
+
+    ships.splice(rowIndex-2, 1);  
 	
 	
 	drawAllShips();
 	draw_panel_connections();
+	UpdateResults();
   }
 
 
@@ -246,10 +277,20 @@ function changeOpeningSizeOrPosition(num) {
 	ships[num].width = parseInt(width_t.innerHTML);
 	ships[num].height = parseInt(height_t.innerHTML);
 
-	drawAllShips();
-	UpdateResults();
-	draw_panel_connections();
+	// adjaust scake factor if does not fit in the canvas
 	
+	
+	if ( (ships[num].width + ships[num].x)* c > 600 ){
+	
+		c = c* 	(5000/ (ships[num].width + ships[num].x) )
+	}
+	
+
+	drawAllShips();
+	draw_panel_connections();
+	UpdateResults();
+	
+
 }
 
 function updateTableAfterMove() {
@@ -270,15 +311,6 @@ function updateTableAfterMove() {
     }
 }
 
-
-
-
-// make some ship
-
-add_initial_opening(20, 30, 280, 200, "DarkSeaGreen", false);  // base
-add_initial_opening(40, 50, 80, 150, "ivory",true);
-add_initial_opening(200, 50, 80, 150, "ivory",true);
-draw_panel_connections();
 
 
 function delay(callback, ms) {
@@ -316,7 +348,7 @@ function makeShip(x, y, width, height, fill, movable) {
 }
 
 
-drawAllShips();
+
 
 
 // ========================== DRAWING =============================
@@ -324,7 +356,8 @@ drawAllShips();
 // drawing all objects in canvas
 function drawAllShips() {
 
-
+	console.log("drawing alls ships", ships.length)
+	
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
@@ -333,37 +366,61 @@ function drawAllShips() {
 		
 		// adding vertical lines for each opening
 		ctx.fillStyle = "DarkOrange";
-		ctx.fillRect(ship.x-t_hout/2,  ships[0].y, t_hout*2, ships[0].height);
-		ctx.fillRect(ship.x + ship.width - t_hout * 1.5 ,  ships[0].y, t_hout*2, ships[0].height);
+		ctx.fillRect(ship.x * c -(t_hout* c)/2,  ships[0].y* c, t_hout* c*2, ships[0].height* c);
+		ctx.fillRect(ship.x * c + ship.width * c - t_hout * c * 1.5 ,  ships[0].y* c, t_hout*c * 2, ships[0].height* c);
 		
 
 		//draw_panel_connections();
 
 
-		var edgeColor = "LightSalmon"  
+		var edgeColor = "grey";
 		
-		
+
 		
 		// filling the opening
 		ctx.fillStyle = ship.fill;
 		ctx.fill();
 		ctx.stroke();
+
 		ctx.strokeStyle = edgeColor;		//LightSalmon  // DarkOrange
-		ctx.lineWidth = t_hout;
+		ctx.lineWidth = t_hout *c;
 		
-		
-		
+		// adjusting needed - just a horizontal woodbord not included in calculation
+		if (i == 0) {						
+			ctx.fillStyle = "DarkOrange";
+
+			ctx.fillRect(ship.x * c - t_hout*0.5*c ,  ships[0].y* c - t_hout*0.5*c, t_hout* c, ship.height * c + t_hout*c);
+			
+			ctx.fillRect(ship.x * c + ship.width * c - t_hout*0.5*c ,  ships[0].y* c - t_hout*0.5*c, t_hout* c, ship.height * c + t_hout*c);
+			
+			ctx.fillRect(ship.x * c - t_hout*0.5*c ,  ships[0].y* c + ships[0].height* c - t_hout*0.5*c, ship.width * c + t_hout*c,t_hout* c);
+			
+		} 
     }
+}
+
+// drawing each ship
+function drawShip(ship) {
 	
-	
+	ctx.beginPath();
+      ctx.moveTo(ship.x* c, ship.y*c);
+      ctx.lineTo(ship.x*c + ship.width*c, ship.y*c);
+      ctx.lineTo(ship.x*c + ship.width*c + 0, ship.y*c + ship.height*c / 2);
+      ctx.lineTo(ship.x*c + ship.width*c, ship.y*c + ship.height*c);
+      ctx.lineTo(ship.x*c, ship.y*c + ship.height*c);
+      ctx.closePath();
+	  
 }
 
 
 // draw vertical connector bars if the distance between opening > panel width
 function draw_panel_connections(){
+
+		console.log("drawing panel connection")
+
 		if ( ships.length >1  ){
 		
-		b_panel = 50;
+
 			//iterating all opening to check a distance between them
 			for (var i = 0; i < ships.length; i++) {
 				var dist = 0;
@@ -371,13 +428,13 @@ function draw_panel_connections(){
 			
 				// distance between the edge and the 1st opening
 				if (i==0){
-					dist = ships[i+1].x  - ships[i].x;
+					dist = ships[i+1].x  - ships[i].x - t_hout;
 					connecting_bars = Math.floor(dist/b_panel)
 					
 					for (var e = 0; e < connecting_bars; e++)      {
 						ctx.fillStyle = "DarkOrange";
-						ctx.fillRect(ships[0].x + b_panel * (e+1), 
-						ships[0].y, t_hout*2, ships[0].height);
+						ctx.fillRect(ships[0].x * c + b_panel * (e+1) * c, 
+						ships[0].y * c, t_hout*2 * c, ships[0].height * c);
 					}
 					
 					
@@ -385,70 +442,43 @@ function draw_panel_connections(){
 				}
 				// distance after the last opening
 				else if (i==ships.length-1){
-					dist = (ships[0].x+ships[0].width)  - (ships[i].x+ ships[i].width);
+					dist = (ships[0].x+ships[0].width)  - (ships[i].x+ ships[i].width) - t_hout;
 					connecting_bars = Math.floor(dist/b_panel);
 					
 					for (var e = 0; e < connecting_bars; e++)      {
 						ctx.fillStyle = "DarkOrange";
-						ctx.fillRect(ships[i].x+ ships[i].width + b_panel * (e+1), 
-						ships[0].y, t_hout*2, ships[0].height);
+						ctx.fillRect(ships[i].x * c+ ships[i].width * c + b_panel * (e+1) * c, 
+						ships[0].y * c, t_hout*2 * c, ships[0].height * c);
 					}
 					
 					
 				}// the rest
 				else {
-					dist = ships[i+1].x  - (ships[i].x+ ships[i].width);
+					dist = ships[i+1].x  - (ships[i].x+ ships[i].width)-t_hout;
 					connecting_bars = Math.floor(dist/b_panel);
-					
 					
 					for (var e = 0; e < connecting_bars; e++)      {
 						ctx.fillStyle = "DarkOrange";
-						ctx.fillRect(ships[i].x+ ships[i].width + b_panel * (e+1), 
-						ships[0].y, t_hout*2, ships[0].height);
+						ctx.fillRect(ships[i].x * c+ ships[i].width * c + b_panel * (e+1) * c, 
+						ships[0].y * c, t_hout*2 * c, ships[0].height * c);
 					}
-					
 				}
-				
-				console.log(i,dist,connecting_bars )
-
 			}
 			
+		// if only one shape is available
+		} else if (ships.length == 1) {
 		
+			connecting_bars = Math.floor((ships[0].width-t_hout)/b_panel);
+			for (var e = 0; e < connecting_bars; e++)      {
+				ctx.fillStyle = "DarkOrange";
+				ctx.fillRect(ships[0].x * c + b_panel * (e+1) * c, 
+				ships[0].y * c, t_hout*2 * c, ships[0].height * c);
+			}
 		}
 		
-		
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// drawing each ship
-function drawShip(ship) {
-
-	  ctx.beginPath();
-      ctx.moveTo(ship.x, ship.y);
-      ctx.lineTo(ship.x + ship.width, ship.y);
-      ctx.lineTo(ship.x + ship.width + 0, ship.y + ship.height / 2);
-      ctx.lineTo(ship.x + ship.width, ship.y + ship.height);
-      ctx.lineTo(ship.x, ship.y + ship.height);
-      ctx.closePath();
-	  
-	  
-}
 
 
 // ========================== MOUSE MOVEMENT =============================
@@ -456,7 +486,8 @@ function drawShip(ship) {
 
 function handleMouseDown(e) {
     mouseX = parseInt(e.clientX - offsetX);
-    mouseY = parseInt(e.clientY - offsetY);
+    mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
+	
 
     // mousedown stuff here
     lastX = mouseX;
@@ -467,7 +498,7 @@ function handleMouseDown(e) {
 
 function handleMouseUp(e) {
     mouseX = parseInt(e.clientX - offsetX);
-    mouseY = parseInt(e.clientY - offsetY);
+    mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
 	
 	
     // mouseup stuff here
@@ -488,36 +519,32 @@ function update_table_after_move(){
 }
 
 
-
 function handleMouseMove(e) {
     if (!mouseIsDown) {
         return;
     }
+	
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
 
-    mouseX = parseInt(e.clientX - offsetX);
-    mouseY = parseInt(e.clientY - offsetY);
+    mouseX = parseInt((e.clientX - offsetX)/c) ;
+    //mouseY =  parseInt((e.clientY - offsetY)/c);
+	mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
+
 	
 
     // mousemove stuff here
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i];
         drawShip(ship);
-        if (ctx.isPointInPath(lastX, lastY)) {
+        if (ctx.isPointInPath(lastX *c, lastY *c)) {
 		
 			if (i>0) {
 			
 			// restricting the movements of the squares inside the biggest one
-			if (ship.x > ships[0].x) {ship.x += (mouseX - lastX)} else {ship.x  = ships[0].x+1}
-			if (ship.y > ships[0].y) {ship.y += (mouseY - lastY)} else {ship.y  = ships[0].y+1}
+			ship.x  += (mouseX - lastX)* 1;
+			ship.y  += (mouseY - lastY)* 1;
 			
-			//if (ship.right < ships[0].right) {ship.x += (mouseX - lastX)} else {ship.x  = ships[0].right - ship.width -1}
-			//if (ship.y > ships[0].y) {ship.y += (mouseY - lastY)} else {ship.y  = ships[0].y+1}
-			
-			
-			//if (ship.right < ships[0].right) {ship.right = ship.x + ship.width} else {ship.right  = ships[0].right-1}
-			//if (ship.bottom < ships[0].bottom) {ship.bottom = ship.x + ship.width} else {ship.bottom  = ships[0].bottom -1}
-			
-         
             ship.right = ship.x + ship.width;
             ship.bottom = ship.y + ship.height;
 			}
@@ -526,9 +553,19 @@ function handleMouseMove(e) {
     lastX = mouseX;
     lastY = mouseY;
 	
+	
 
+
+	ctx.beginPath();
+	ctx.arc(mouseX, mouseY, 50, 0, 2 * Math.PI);
+	ctx.fillStyle = "orange";
+	ctx.fill();
+	
     drawAllShips();
 }
+
+
+
 
 
 
@@ -554,10 +591,8 @@ function UpdateResults() {
 
 	// greenPixels
 	
-	console.log("Number of x pixels:", greenPixels);
+	 document.getElementById("main_rez").innerHTML = "Percentage: "+ ((orangePixels/total_pix)*100).toFixed(2) + " %"
 	
-	
-
 }
 
 
