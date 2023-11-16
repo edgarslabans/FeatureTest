@@ -126,6 +126,9 @@ var txt = document.getElementById("demo");
 var c = 0.1		// reduction cof to fit shape in canvas
 
 
+var rez_percentage = 66;
+
+
 ctx.translate(0, canvas.height);
 ctx.scale(1, -1);
 
@@ -140,11 +143,81 @@ function launch_preconfigurated_element(){
 
 // make some ship
 
-add_shape(200, 300, 4000, 2700, "DarkSeaGreen", false);  // base
-add_shape(660, 900, 800, 1500, "ivory",true);
-add_shape(2000, 900, 800, 1500, "ivory",true);
+add_shape(200, 2500, 1000, 1000, "DarkSeaGreen", false);  // base/
+//add_shape(660, 900, 800, 1500, "ivory",true);
+//add_shape(2000, 900, 800, 1500, "ivory",true);
 
 }
+
+
+
+
+function corrected_result(){
+
+	
+	var t_hout_old = t_hout; // saving initial thickness to return it back
+	
+	var mm_per_pix = 1/c;
+	
+	var bot_round_num = Math.floor(t_hout/mm_per_pix)*mm_per_pix;
+	var top_round_num = bot_round_num + mm_per_pix;
+	
+	var dikte_pos_in_pixel = (t_hout-bot_round_num)/ mm_per_pix;
+	
+	// calculate result at the lowest round thickness 
+	
+	t_hout = bot_round_num;
+	drawAllShips();
+	UpdateResults();
+	var rez_bot = rez_percentage;
+	
+	// calculate result at the highest round thickness 
+	
+	t_hout = top_round_num;
+	drawAllShips();
+	UpdateResults();
+	var rez_top = rez_percentage;
+	
+	
+	var finaal_rez = rez_bot + (rez_top- rez_bot) * dikte_pos_in_pixel;
+
+	
+
+	var darkOrangePixelCount = countDarkOrangePixelsInArea(context, xCoordinate, yCoordinate, areaWidth, areaHeight);
+
+	console.log("Number of DarkOrange Pixels in the Area:", darkOrangePixelCount,t_hout, " fin "+ finaal_rez);
+	
+	
+	
+	t_hout_ = t_hout_old
+	
+	drawAllShips();
+	UpdateResults();
+
+	
+	
+	return finaal_rez;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function add_shape(x,y, b,h, col, movable){
@@ -356,7 +429,7 @@ function makeShip(x, y, width, height, fill, movable) {
 // drawing all objects in canvas
 function drawAllShips() {
 
-	console.log("drawing alls ships", ships.length)
+	//console.log("drawing alls ships", ships.length)
 	
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
@@ -364,51 +437,24 @@ function drawAllShips() {
 
         drawShip(ship);
 		
-		// adding vertical lines for each opening
-		ctx.fillStyle = "DarkOrange";
-		ctx.fillRect(ship.x * c -(t_hout* c)/2,  ships[0].y* c, t_hout* c*2, ships[0].height* c);
-		ctx.fillRect(ship.x * c + ship.width * c - t_hout * c * 1.5 ,  ships[0].y* c, t_hout*c * 2, ships[0].height* c);
-		
-
-		//draw_panel_connections();
-
-
-		var edgeColor = "grey";
-		
-
-		
-		// filling the opening
-		ctx.fillStyle = ship.fill;
-		ctx.fill();
-		ctx.stroke();
-
-		ctx.strokeStyle = edgeColor;		//LightSalmon  // DarkOrange
-		ctx.lineWidth = t_hout *c;
-		
-		// adjusting needed - just a horizontal woodbord not included in calculation
-		if (i == 0) {						
-			ctx.fillStyle = "DarkOrange";
-
-			ctx.fillRect(ship.x * c - t_hout*0.5*c ,  ships[0].y* c - t_hout*0.5*c, t_hout* c, ship.height * c + t_hout*c);
-			
-			ctx.fillRect(ship.x * c + ship.width * c - t_hout*0.5*c ,  ships[0].y* c - t_hout*0.5*c, t_hout* c, ship.height * c + t_hout*c);
-			
-			ctx.fillRect(ship.x * c - t_hout*0.5*c ,  ships[0].y* c + ships[0].height* c - t_hout*0.5*c, ship.width * c + t_hout*c,t_hout* c);
-			
-		} 
     }
 }
 
 // drawing each ship
 function drawShip(ship) {
 	
-	ctx.beginPath();
-      ctx.moveTo(ship.x* c, ship.y*c);
-      ctx.lineTo(ship.x*c + ship.width*c, ship.y*c);
-      ctx.lineTo(ship.x*c + ship.width*c + 0, ship.y*c + ship.height*c / 2);
-      ctx.lineTo(ship.x*c + ship.width*c, ship.y*c + ship.height*c);
-      ctx.lineTo(ship.x*c, ship.y*c + ship.height*c);
-      ctx.closePath();
+
+	ctx.fillStyle =   "DarkOrange";
+
+	ctx.fillRect(ship.x * c,  ship.y* c , ship.width* c, ship.height * c );
+	  //console.log(ship.x * c,  ship.y* c , ship.width* c, ship.height * c )
+	  
+	 ctx.fillStyle = ship.fill;
+	 ctx.fillRect(ship.x * c + t_hout*c,  ship.y* c + t_hout*c,  ship.width* c - t_hout*c*2, ship.height * c - t_hout*c*2);
+
+
+	  
+	  
 	  
 }
 
@@ -416,7 +462,7 @@ function drawShip(ship) {
 // draw vertical connector bars if the distance between opening > panel width
 function draw_panel_connections(){
 
-		console.log("drawing panel connection")
+		//console.log("drawing panel connection")
 
 		if ( ships.length >1  ){
 		
@@ -486,8 +532,8 @@ function draw_panel_connections(){
 
 function handleMouseDown(e) {
     mouseX = parseInt(e.clientX - offsetX);
-    mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
-	
+	mouseY = parseInt(e.clientY - offsetY);
+
 
     // mousedown stuff here
     lastX = mouseX;
@@ -498,7 +544,7 @@ function handleMouseDown(e) {
 
 function handleMouseUp(e) {
     mouseX = parseInt(e.clientX - offsetX);
-    mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
+    mouseY = parseInt(e.clientY - offsetY);
 	
 	
     // mouseup stuff here
@@ -573,9 +619,6 @@ function handleMouseMove(e) {
 //function attached to button
 function UpdateResults() {
 
- 
-   
-
 	var canvas = document.getElementById("canvas");
 	const greenPixels = countPixelsByColor(canvas, "DarkSeaGreen");
 	const orangePixels = countPixelsByColor(canvas, "DarkOrange");
@@ -585,13 +628,34 @@ function UpdateResults() {
 	var total_pix = greenPixels + orangePixels+ edgeOpeningPixels
 	
 	
+	// aanpassing voor onvoldoende resolutie
+	
+	mm_per_pix = 1/c; 
+	pixels_per_regel = Math.round(t_hout/mm_per_pix);
+	t_hout_approx = pixels_per_regel * mm_per_pix;
+	mm_pix_correctie_factor = t_hout_approx/t_hout;
+	
+	
+		var updated_result = corrected_result();
+	
 	
 	 document.getElementById("demo").innerHTML = "gr: " + greenPixels + " or: " + orangePixels + " edge: " + edgeOpeningPixels +  " op: " + openingPixels +
         " Sandwich: " + (greenPixels/total_pix).toFixed(2) + " Timber Frame: " + (orangePixels/total_pix).toFixed(2)  + " Outside calc: " + ((openingPixels)/total_pix).toFixed(2);
 
 	// greenPixels
-	
-	 document.getElementById("main_rez").innerHTML = "Percentage: "+ ((orangePixels/total_pix)*100).toFixed(2) + " %"
+
+	 //writing result to global variable
+	 rez_percentage = (orangePixels/total_pix)*100;
+	 
+	 	 document.getElementById("main_rez").innerHTML = "Percentage: "+ ((orangePixels/total_pix)*100).toFixed(2) + " % "
+	 + " Percentage(adj): "+ (555).toFixed(2) + " %";
+	 
+	 
+	 
+	 
+	 
+	 
+	 
 	
 }
 
