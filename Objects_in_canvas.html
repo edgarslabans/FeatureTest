@@ -93,6 +93,14 @@
         <label for="rightCheckbox">Right</label>
         <input type="checkbox" id="rightCheckbox" onchange="updateProjectProperties()">
     </div>
+	
+	<div style="margin-bottom: 20px;">
+    <label for="connectingElement">Connecting Element:</label>
+    <select id="connectingElement" onchange="updateProjectProperties()">
+        <option value="full">Full</option>
+        <option value="separate">Separate</option>
+    </select>
+</div>
 
 
     <p id="main_rez"> - </p>
@@ -142,7 +150,7 @@ var txt = document.getElementById("demo");
 
 var c = 0.1  //0.0806   //0.1		// reduction cof to fit shape in canvas
 
-
+let typingTimeout;		// typing tymeout
 var rez_percentage = 66;
 
 
@@ -224,20 +232,20 @@ function addRow(x,y,b,h) {
       // Create table cells
       let c1 = row.insertCell(0);
 	  c1.setAttribute("contenteditable", "true");
-	  c1.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
+	  c1.setAttribute("onkeyup", "delayedUpdateProjectProperties("+ String(table.rows.length-3) + ")");
 	  
 	  
       let c2 = row.insertCell(1);
       c2.setAttribute("contenteditable", "true"); 
-	  c2.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
+	  c2.setAttribute("onkeyup", "delayedUpdateProjectProperties("+ String(table.rows.length-3) + ")");
 	  
       let c3 = row.insertCell(2);
 	  c3.setAttribute("contenteditable", "true"); 
-	  c3.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
+	  c3.setAttribute("onkeyup", "delayedUpdateProjectProperties("+ String(table.rows.length-3) + ")");
 	  
 	  let c4 = row.insertCell(3);
 	  c4.setAttribute("contenteditable", "true"); 
-	  c4.setAttribute("onkeyup", "changeOpeningSizeOrPosition("+ String(table.rows.length-3) + ")");
+	  c4.setAttribute("onkeyup", "delayedUpdateProjectProperties("+ String(table.rows.length-3) + ")");
 	  
 		// Create a cell for the "Delete" button
 		if (ships.length >1) {
@@ -280,7 +288,7 @@ function addRow(x,y,b,h) {
 // changes the size or position of the opening by adjusting values in the table
 function changeOpeningSizeOrPosition(num) {
 
-	console.log("hiere", num)
+
 	var table = document.getElementById('myTable')
 
 	// Access the second row (index 1) in the first column (index 0) in the tbody
@@ -309,15 +317,29 @@ function changeOpeningSizeOrPosition(num) {
 		c= Math.floor(c*100)/100;
 	}
 	
-	
-
 
 	drawAllShips();
 	draw_panel_connections();
 	UpdateResults();
-	
-
 }
+
+// launching changeOpeningSizeOrPosition with timeout
+function delayedUpdateProjectProperties(row_ind) {
+    clearTimeout(typingTimeout);
+
+    typingTimeout = setTimeout(function() {
+
+        changeOpeningSizeOrPosition(row_ind);
+    }, 500); 
+}
+
+
+
+
+
+
+
+
 
 function updateTableAfterMove() {
     // Iterate through each ship and update its corresponding table row
@@ -402,13 +424,6 @@ function drawAllShips() {
             const leftCheckbox = document.getElementById("leftCheckbox");
             const rightCheckbox = document.getElementById("rightCheckbox");
 
-            console.log("Top checkbox checked:", topCheckbox.checked);
-            console.log("Bottom checkbox checked:", bottomCheckbox.checked);
-            console.log("Left checkbox checked:", leftCheckbox.checked);
-            console.log("Right checkbox checked:", rightCheckbox.checked);
-			
-			
-			
 			
 			if (leftCheckbox.checked == false){
 				ctx.fillRect(ship.x * c ,  ships[0].y* c + t_hout* c , t_hout* c, ship.height * c -  t_hout* c);
@@ -447,7 +462,22 @@ function drawShip(ship) {
 // draw vertical connector bars if the distance between opening > panel width
 function draw_panel_connections(){
 
-		console.log("drawing panel connection", ships.length)
+		
+		
+		var connectingElementDropdown = document.getElementById("connectingElement");
+		var selectedConnectingElement = connectingElementDropdown.value;
+		
+		
+		var fillColorConnector = "gold";
+
+		if (selectedConnectingElement === "full") {
+			fillColorConnector = "DarkOrange";
+		} 
+
+
+    // Log the selected value (you can use it as needed)
+
+		
 
 		if ( ships.length >1  ){
 		
@@ -455,7 +485,7 @@ function draw_panel_connections(){
 			//iterating all opening to check a distance between them
 			for (var i = 0; i < ships.length; i++) {
 				var dist = 0;
-				var connecting_bars = 0
+				var connecting_bars = 0;
 			
 				// distance between the edge and the 1st opening
 				if (i==0){
@@ -463,7 +493,7 @@ function draw_panel_connections(){
 					connecting_bars = Math.floor(dist/b_panel)
 					
 					for (var e = 0; e < connecting_bars; e++)      {
-						ctx.fillStyle = "DarkOrange";
+						ctx.fillStyle = fillColorConnector;
 						ctx.fillRect(ships[0].x * c + b_panel * (e+1) * c, 
 						ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout * 2* c);
 					}
@@ -473,11 +503,9 @@ function draw_panel_connections(){
 					dist = (ships[0].x+ships[0].width)  - (ships[i].x+ ships[i].width) - t_hout;
 					connecting_bars = Math.floor(dist/b_panel);
 					
-					console.log("after last open", dist,connecting_bars )
-					
-					
+
 					for (var e = 0; e < connecting_bars; e++)      {
-						ctx.fillStyle = "DarkOrange";
+						ctx.fillStyle = fillColorConnector;
 						ctx.fillRect(ships[i].x * c+ ships[i].width * c + b_panel * (e+1) * c, 
 						ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout *2 * c);
 					}
@@ -489,7 +517,7 @@ function draw_panel_connections(){
 					connecting_bars = Math.floor(dist/b_panel);
 					
 					for (var e = 0; e < connecting_bars; e++)      {
-						ctx.fillStyle = "DarkOrange";
+						ctx.fillStyle = fillColorConnector;
 						ctx.fillRect(ships[i].x * c+ ships[i].width * c + b_panel * (e+1) * c, 
 						ships[0].y * c + t_hout * c, t_hout*2 * c, ships[0].height * c - t_hout *2 * c);
 					}
@@ -501,7 +529,7 @@ function draw_panel_connections(){
 		
 			connecting_bars = Math.floor((ships[0].width-t_hout)/b_panel);
 			for (var e = 0; e < connecting_bars; e++)      {
-				ctx.fillStyle = "DarkOrange";
+				ctx.fillStyle = fillColorConnector;
 				ctx.fillRect(ships[0].x * c + b_panel * (e+1) * c, 
 				ships[0].y * c + t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout * 2 * c);
 			}
@@ -621,10 +649,11 @@ function UpdateResults() {
 	var canvas = document.getElementById("canvas");
 	var greenPixels = countPixelsByColor(canvas, "DarkSeaGreen");
 	var orangePixels = countPixelsByColor(canvas, "DarkOrange");
+	var goldPixels = countPixelsByColor(canvas, "gold");
 	var edgeOpeningPixels = countPixelsByColor(canvas, "LightSalmon");
 	var openingPixels = countPixelsByColor(canvas, "ivory");
 	
-	var total_pix = greenPixels + orangePixels+ edgeOpeningPixels
+	var total_pix = greenPixels + orangePixels+ edgeOpeningPixels + goldPixels
 	rez_percentage = (orangePixels/total_pix)*100;
 	
 	var rez_bot = rez_percentage;
@@ -637,16 +666,24 @@ function UpdateResults() {
 	draw_panel_connections();
 	
 	orangePixels = countPixelsByColor(canvas, "DarkOrange");	
+	var goldPixels_top = countPixelsByColor(canvas, "gold");
 	rez_percentage = (orangePixels/total_pix)*100;				// <-- update of the rest of the pixels skipped
 	
 	var rez_top = rez_percentage;
 	
 	var finaal_rez = rez_bot + (rez_top - rez_bot) * dikte_pos_in_pixel;
+	var finaal_rez_connectors = ((goldPixels + (goldPixels_top - goldPixels) * dikte_pos_in_pixel)/total_pix) * 100 ;
 
 	// returning initial wood thickness
 	t_hout = t_hout_old
 	
+	
+	if (goldPixels > 0) {
+		document.getElementById("main_rez").innerHTML = " Percentage: "+ (finaal_rez+ finaal_rez_connectors).toFixed(2) + " %" + " ( " + (finaal_rez).toFixed(2) + " % + "+ (finaal_rez_connectors).toFixed(2) + " %)"  ;
+	} else {
+	
 	document.getElementById("main_rez").innerHTML = " Percentage: "+ (finaal_rez).toFixed(2) + " %";
+	}
 
 }
 
