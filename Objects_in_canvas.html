@@ -148,12 +148,12 @@ var b_panel = 1000 // width of the panel
 
 var txt = document.getElementById("demo");
 
-var c = 0.1  //0.0806   //0.1		// reduction cof to fit shape in canvas
+var c = 0.1  // scale coef to fit shape in canvas
 
 let typingTimeout;		// typing tymeout
 var rez_percentage = 66;
 
-
+// inverting canvas Y coordinate
 ctx.translate(0, canvas.height);
 ctx.scale(1, -1);
 
@@ -163,17 +163,14 @@ updateProjectProperties();
 launch_preconfigurated_element();
 
 
+// plotting default element at the startup
 function launch_preconfigurated_element(){
 
-
 // make some ship
-
 add_shape(200, 200, 4000, 2500, "DarkSeaGreen", false);  // base/
 add_shape(660, 900, 800, 1500, "ivory",true);
 add_shape(2000, 900, 800, 1500, "ivory",true);
-
 }
-
 
 
 function add_shape(x,y, b,h, col, movable){
@@ -201,6 +198,7 @@ function add_opening(){
 	
 }
 
+// Update project by changing fields in UI [b_panel, t_hout, sides, seperator);
 function updateProjectProperties() {
     b_panel = parseInt(document.getElementById("panelWidthInput").value) || 0;
     t_hout = parseInt(document.getElementById("woodThicknessInput").value) || 0;
@@ -211,13 +209,6 @@ function updateProjectProperties() {
 }
 
 
-
-function check_properties(){
-
-//draw_panel_connections();
-drawAllShips();
-
-}
 
 // add row in the table
 
@@ -261,14 +252,14 @@ function addRow(x,y,b,h) {
 		  deleteCell.appendChild(deleteButton);
 	  }
 
-	
-      // Add data to c1 and c2
+      // Adding data to each cell
       c1.innerText = x
       c2.innerText = y
       c3.innerText = b
 	  c4.innerText = h
    }
 
+// delete opening with the button from interface
   function deleteRow(row) {
     let table = document.getElementById("myTable");
     let rowIndex = row.rowIndex;
@@ -330,17 +321,11 @@ function delayedUpdateProjectProperties(row_ind) {
     typingTimeout = setTimeout(function() {
 
         changeOpeningSizeOrPosition(row_ind);
-    }, 500); 
+    }, 500); //<-- timeout here ms
 }
 
 
-
-
-
-
-
-
-
+// update x and y coordinate of each element after move
 function updateTableAfterMove() {
     // Iterate through each ship and update its corresponding table row
    var table = document.getElementById("myTable");
@@ -359,26 +344,7 @@ function updateTableAfterMove() {
     }
 }
 
-
-
-function delay(callback, ms) {
-  var timer = 0;
-  return function() {
-    var context = this, args = arguments;
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      callback.apply(context, args);
-    }, ms || 0);
-  };
-}
-
-$('#input').keyup(delay(function (e) {
-  console.log('Time elapsed!', this.value);
-}, 500));
-
-
-
-
+// make opening object
 function makeShip(x, y, width, height, fill, movable) {
     var ship = {
         x: x,
@@ -400,14 +366,12 @@ function makeShip(x, y, width, height, fill, movable) {
 // drawing all objects in canvas
 function drawAllShips() {
 
-	//console.log("drawing alls ships", ships.length)
-	
-	
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
 		
-				// adding vertical lines for each opening
+		// adding vertical lines behind each opening
 		ctx.fillStyle = "DarkOrange";
 		ctx.fillRect(ship.x * c ,  ships[0].y* c + t_hout* c, t_hout* c*2, ships[0].height * c - t_hout * 2* c  );
 		ctx.fillRect(ship.x * c + ship.width * c - t_hout * c * 2 ,  ships[0].y * c + t_hout* c, t_hout*c * 2, ships[0].height* c - t_hout * 2* c );
@@ -415,7 +379,7 @@ function drawAllShips() {
 		
 		drawShip(ship);
 		
-		// extra edge beams
+		// extra edge beams on or off
 			if (i == 0) {						
 			ctx.fillStyle = "DarkOrange";
 			
@@ -447,7 +411,6 @@ function drawAllShips() {
 // drawing each ship
 function drawShip(ship) {
 	
-
 	ctx.fillStyle =   "grey";
 
 	ctx.fillRect(ship.x * c,  ship.y* c , ship.width* c, ship.height * c );
@@ -462,80 +425,54 @@ function drawShip(ship) {
 // draw vertical connector bars if the distance between opening > panel width
 function draw_panel_connections(){
 
-		
-		
+		// adjusting color for connector based on the value inside drop down list
 		var connectingElementDropdown = document.getElementById("connectingElement");
 		var selectedConnectingElement = connectingElementDropdown.value;
 		
-		
 		var fillColorConnector = "gold";
-
 		if (selectedConnectingElement === "full") {
 			fillColorConnector = "DarkOrange";
 		} 
 
-
-    // Log the selected value (you can use it as needed)
-
-		
-
-		if ( ships.length >1  ){
-		
-
+		if ( ships.length > 1  ){
 			//iterating all opening to check a distance between them
 			for (var i = 0; i < ships.length; i++) {
 				var dist = 0;
-				var connecting_bars = 0;
 			
 				// distance between the edge and the 1st opening
 				if (i==0){
 					dist = ships[i+1].x  - ships[i].x - t_hout;
-					connecting_bars = Math.floor(dist/b_panel)
-					
-					for (var e = 0; e < connecting_bars; e++)      {
-						ctx.fillStyle = fillColorConnector;
-						ctx.fillRect(ships[0].x * c + b_panel * (e+1) * c, 
-						ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout * 2* c);
-					}
+					drawSingleConnector(dist, fillColorConnector, ships[0].x * c);
 				}
 				// distance after the last opening
 				else if (i==ships.length-1){
 					dist = (ships[0].x+ships[0].width)  - (ships[i].x+ ships[i].width) - t_hout;
-					connecting_bars = Math.floor(dist/b_panel);
-					
-
-					for (var e = 0; e < connecting_bars; e++)      {
-						ctx.fillStyle = fillColorConnector;
-						ctx.fillRect(ships[i].x * c+ ships[i].width * c + b_panel * (e+1) * c, 
-						ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout *2 * c);
-					}
-					
-					
-				}// the rest
+					drawSingleConnector(dist, fillColorConnector, (ships[i].x+ ships[i].width) * c);
+				}
+				// the rest
 				else {
 					dist = ships[i+1].x  - (ships[i].x+ ships[i].width)-t_hout;
-					connecting_bars = Math.floor(dist/b_panel);
-					
-					for (var e = 0; e < connecting_bars; e++)      {
-						ctx.fillStyle = fillColorConnector;
-						ctx.fillRect(ships[i].x * c+ ships[i].width * c + b_panel * (e+1) * c, 
-						ships[0].y * c + t_hout * c, t_hout*2 * c, ships[0].height * c - t_hout *2 * c);
-					}
+					drawSingleConnector(dist, fillColorConnector, (ships[i].x+ ships[i].width-t_hout) * c);
 				}
 			}
-			
 		// if only one shape is available
 		} else if (ships.length == 1) {
-		
-			connecting_bars = Math.floor((ships[0].width-t_hout)/b_panel);
-			for (var e = 0; e < connecting_bars; e++)      {
-				ctx.fillStyle = fillColorConnector;
-				ctx.fillRect(ships[0].x * c + b_panel * (e+1) * c, 
-				ships[0].y * c + t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout * 2 * c);
-			}
+			drawSingleConnector((ships[0].width-t_hout)*c, fillColorConnector, ships[0].x * c);
 		}
-		
 }
+
+// draw single connector block 
+function drawSingleConnector(distance, fillCol, origin){
+	//determinign how much bars are needed	
+	connecting_bars = Math.floor(distance/b_panel);
+
+	for (var e = 0; e < connecting_bars; e++)      {
+		ctx.fillStyle = "red";
+		ctx.fillRect(origin + b_panel * (e+1) * c, 
+		ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout *2 * c);
+	}
+}
+
 
 
 
@@ -625,7 +562,13 @@ function handleMouseMove(e) {
 
 
 
-//function attached to button
+// main calculation node of the project. The result is the ratio of the timber elements against the whole area (-windows)
+// due to the limited resolution of the canvas, the correction algorith is added:
+// at first the thickness of the wood elements are slightly increased unitil it corresponds integer ammount of pixels
+// in the second step the thickness of the wood elements are decreased by 1 pixel () (by adjustting parameter t_hout)
+// the final result is a point between these 2 extremes, depending how far the actual thickness is from thicknessses corresponding to teh t in full pixels
+
+
 function UpdateResults() {
 
 	var t_hout_old = t_hout; // saving initial thickness to return it back
