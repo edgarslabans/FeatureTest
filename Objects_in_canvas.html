@@ -516,46 +516,37 @@ function update_table_after_move(){
 
 
 function handleMouseMove(e) {
-    if (!mouseIsDown) {
+	if (!mouseIsDown) {
         return;
     }
-	
-	const canvas = document.getElementById("canvas");
-	const ctx = canvas.getContext("2d");
 
-    mouseX = parseInt((e.clientX - offsetX)/c) ;
-    //mouseY =  parseInt((e.clientY - offsetY)/c);
-	mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
 
-	
+    mouseX = parseInt((e.clientX - offsetX) / c);
+    mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
 
-    // mousemove stuff here
-    for (var i = 0; i < ships.length; i++) {
-        var ship = ships[i];
-        drawShip(ship);
-        if (ctx.isPointInPath(lastX *c, lastY *c)) {
-		
-			if (i>0) {
-			
-			// restricting the movements of the squares inside the biggest one
-			ship.x  += (mouseX - lastX)* 1;
-			ship.y  += (mouseY - lastY)* 1;
-			
-            ship.right = ship.x + ship.width;
-            ship.bottom = ship.y + ship.height;
-			}
+    // Iterate through each shape and check if the mouse is within its bounding box
+    for (let i = 0; i < ships.length; i++) {
+        const ship = ships[i];
+        if (
+            mouseX >= ship.x &&
+            mouseX <= ship.x + ship.width &&
+            mouseY >= ship.y &&
+            mouseY <= ship.y + ship.height
+        ) {
+            // If the mouse is over a shape, update its position
+            if (i > 0 && ship.movable) {
+                ship.x += mouseX - lastX;
+                ship.y += mouseY - lastY;
+                ship.right = ship.x + ship.width;
+                ship.bottom = ship.y + ship.height;
+            }
         }
     }
+
     lastX = mouseX;
     lastY = mouseY;
-	
-	
-
-
-	ctx.beginPath();
-	ctx.arc(mouseX, mouseY, 50, 0, 2 * Math.PI);
-	ctx.fillStyle = "orange";
-	ctx.fill();
 	
     drawAllShips();
 }
