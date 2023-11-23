@@ -6,60 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Timber Volume</title>
     <style>
-        body {
-            background-color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            margin: 0;
-        }
-
-        canvas {
-            border: 1px solid grey;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px 0;
-        }
-
-        table {
-            width: 100%;
-            max-width: 800px;
-            margin-top: 20px;
-            background-color: white;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            border: 1px solid #dee2e6;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f8f9fa;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        input[type="number"] {
-            width: 80px;
-            padding: 5px;
-            margin-right: 10px;
-        }
+        body,table{background-color:#fff}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:20px;margin:0}canvas{border:1px solid grey;max-width:100%;height:auto;display:block;margin:20px 0}table{width:100%;max-width:800px;margin-top:20px;border-collapse:collapse;margin-bottom:20px}td,th{border:1px solid #dee2e6;padding:8px;text-align:center}th{background-color:#f8f9fa}button{background-color:#007bff;color:#fff;border:none;padding:10px 20px;cursor:pointer;border-radius:4px;margin-right:10px;margin-bottom:10px}button:hover{background-color:#0056b3}input[type=number]{width:80px;padding:5px;margin-right:10px}
     </style>
 </head>
 
@@ -126,8 +73,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script type="text/javascript">
   
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext("2d");
+const canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
 ctx.strokeStyle = "lightgray";
 
 
@@ -523,8 +470,8 @@ function handleMouseMove(e) {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
-    mouseX = parseInt((e.clientX - offsetX) / c);
-    mouseY = parseInt((canvas.height - (e.clientY - offsetY)) / c);
+    mouseX = parseInt((e.clientX - offsetX));
+    mouseY = parseInt((canvas.height - (e.clientY - offsetY)));
 
     // Iterate through each shape and check if the mouse is within its bounding box
     for (let i = 0; i < ships.length; i++) {
