@@ -319,7 +319,17 @@ function drawAllShips() {
         var ship = ships[i]
 		
 		// adding vertical lines behind each opening
-		ctx.fillStyle = "DarkOrange";
+		
+		// adjusting color for connector based on the value inside drop down list
+		var connectingElementDropdown = document.getElementById("connectingElement");
+		var selectedConnectingElement = connectingElementDropdown.value;
+		
+		var fillColorConnector = "gold";
+		if (selectedConnectingElement === "full") {
+			fillColorConnector = "DarkOrange";
+		} 
+		
+		ctx.fillStyle = fillColorConnector;
 		ctx.fillRect(ship.x * c ,  ships[0].y* c + t_hout* c, t_hout* c*2, ships[0].height * c - t_hout * 2* c  );
 		ctx.fillRect(ship.x * c + ship.width * c - t_hout * c * 2 ,  ships[0].y * c + t_hout* c, t_hout*c * 2, ships[0].height* c - t_hout * 2* c );
 		
@@ -380,6 +390,8 @@ function draw_panel_connections(){
 		if (selectedConnectingElement === "full") {
 			fillColorConnector = "DarkOrange";
 		} 
+		
+		console.log("")
 
 		if ( ships.length > 1  ){
 			//iterating all opening to check a distance between them
@@ -414,7 +426,7 @@ function drawSingleConnector(distance, fillCol, origin){
 	connecting_bars = Math.floor(distance/b_panel);
 
 	for (var e = 0; e < connecting_bars; e++)      {
-		ctx.fillStyle = "red";
+		ctx.fillStyle = fillCol;
 		ctx.fillRect(origin + b_panel * (e+1) * c, 
 		ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout *2 * c);
 	}
