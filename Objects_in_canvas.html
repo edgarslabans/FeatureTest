@@ -93,6 +93,9 @@ var ships = [];
 var t_hout = 44 // thickness of the wood elements
 var b_panel = 1000 // width of the panel
 
+var t_connecting_bar = t_hout*2 /	/ // thickness of the connecting element between panels
+	    
+
 var txt = document.getElementById("demo");
 
 var c = 0.1  // scale coef to fit shape in canvas
@@ -428,7 +431,7 @@ function drawSingleConnector(distance, fillCol, origin){
 	for (var e = 0; e < connecting_bars; e++)      {
 		ctx.fillStyle = fillCol;
 		ctx.fillRect(origin + b_panel * (e+1) * c, 
-		ships[0].y * c+ t_hout * c, t_hout*2 * c, ships[0].height * c- t_hout *2 * c);
+		ships[0].y * c+ t_hout * c, t_connecting_bar * c, ships[0].height * c- t_hout *2 * c);
 	}
 }
 
