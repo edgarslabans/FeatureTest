@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <p style="font-size: 25px;"><b>Simple timber volume</b></p>
+    <p style="font-size: 25px;"><b>Simple timber volume v 1.1</b></p>
 
     <div style="margin-bottom: 20px;">
         Panel width:
@@ -46,6 +46,7 @@
     <select id="connectingElement" onchange="updateProjectProperties()">
         <option value="full">Full</option>
         <option value="separate">Separate</option>
+		<option value="combined">Combined</option>
     </select>
 </div>
 
@@ -93,7 +94,8 @@ var ships = [];
 var t_hout = 44 // thickness of the wood elements
 var b_panel = 1000 // width of the panel
 
-var t_connecting_bar = t_hout*2 /	/ // thickness of the connecting element between panels
+ // thickness of the connecting element between panels
+var t_connecting_bar = 44  // <--temp disabled
 	    
 
 var txt = document.getElementById("demo");
@@ -327,10 +329,12 @@ function drawAllShips() {
 		var connectingElementDropdown = document.getElementById("connectingElement");
 		var selectedConnectingElement = connectingElementDropdown.value;
 		
-		var fillColorConnector = "gold";
-		if (selectedConnectingElement === "full") {
+		var fillColorConnector = "gold";	// was gold
+		if  ( selectedConnectingElement === "combined"  || selectedConnectingElement === "full") {
 			fillColorConnector = "DarkOrange";
 		} 
+		
+		console.log("option",selectedConnectingElement )
 		
 		ctx.fillStyle = fillColorConnector;
 		ctx.fillRect(ship.x * c ,  ships[0].y* c + t_hout* c, t_hout* c*2, ships[0].height * c - t_hout * 2* c  );
@@ -394,7 +398,7 @@ function draw_panel_connections(){
 			fillColorConnector = "DarkOrange";
 		} 
 		
-		console.log("")
+		
 
 		if ( ships.length > 1  ){
 			//iterating all opening to check a distance between them
@@ -431,8 +435,10 @@ function drawSingleConnector(distance, fillCol, origin){
 	for (var e = 0; e < connecting_bars; e++)      {
 		ctx.fillStyle = fillCol;
 		ctx.fillRect(origin + b_panel * (e+1) * c, 
-		ships[0].y * c+ t_hout * c, t_connecting_bar * c, ships[0].height * c- t_hout *2 * c);
+		ships[0].y * c+ t_hout * c, t_hout * 2 * c, ships[0].height * c- t_hout *2 * c);
 	}
+	
+	//console.log("v1.1",t_connecting_bar *2* c)
 }
 
 
