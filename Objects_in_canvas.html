@@ -21,6 +21,9 @@
     <div style="margin-bottom: 20px;">
         Wood thickness:
         <input type="number" id="woodThicknessInput" value="44" onchange="updateProjectProperties()">
+		
+		 Connector thickness:
+        <input type="number" id="connectorThicknessInput" value="44" onchange="updateProjectProperties()">
     </div>
 
 	
@@ -52,6 +55,25 @@
 
 
     <p id="main_rez"> - </p>
+	
+	<label onclick="toggleAdvancedOptions()">Advanced</label>
+	
+	<div id="advancedOptions" style="display: none; margin-bottom: 20px;">
+		<label>Offset top:</label>
+		<input type="number" id="offsetTopInput" value="0" onchange="updateProjectProperties()">
+		
+		<label>Offset bottom:</label>
+		<input type="number" id="offsetBottomInput" value="0" onchange="updateProjectProperties()">
+		
+		<label>Offset left:</label>
+		<input type="number" id="offsetLeftInput" value="0" onchange="updateProjectProperties()">
+		
+		<label>Offset right:</label>
+		<input type="number" id="offsetRightInput" value="0" onchange="updateProjectProperties()">
+	</div>
+	
+	
+	
 
     <canvas id="canvas" width=600 height=400></canvas>
 
@@ -132,6 +154,7 @@ function add_shape(x,y, b,h, col, movable){
 	
 	drawAllShips();
 	draw_panel_connections();
+	draw_offsets();
 	UpdateResults();
 }
 
@@ -157,8 +180,15 @@ function updateProjectProperties() {
 	
     drawAllShips();
     draw_panel_connections();
+	draw_offsets();
 	UpdateResults();
 }
+
+// d
+    function toggleAdvancedOptions() {
+        var advancedOptions = document.getElementById("advancedOptions");
+        advancedOptions.style.display = (advancedOptions.style.display === "none") ? "block" : "none";
+    }
 
 
 
@@ -223,6 +253,7 @@ function addRow(x,y,b,h) {
 	
 	drawAllShips();
 	draw_panel_connections();
+	draw_offsets();
 	UpdateResults();
   }
 
@@ -263,6 +294,7 @@ function changeOpeningSizeOrPosition(num) {
 
 	drawAllShips();
 	draw_panel_connections();
+	draw_offsets();
 	UpdateResults();
 }
 
@@ -334,8 +366,6 @@ function drawAllShips() {
 			fillColorConnector = "DarkOrange";
 		} 
 		
-		console.log("option",selectedConnectingElement )
-		
 		ctx.fillStyle = fillColorConnector;
 		ctx.fillRect(ship.x * c ,  ships[0].y* c + t_hout* c, t_hout* c*2, ships[0].height * c - t_hout * 2* c  );
 		ctx.fillRect(ship.x * c + ship.width * c - t_hout * c * 2 ,  ships[0].y * c + t_hout* c, t_hout*c * 2, ships[0].height* c - t_hout * 2* c );
@@ -343,7 +373,7 @@ function drawAllShips() {
 		
 		drawShip(ship);
 		
-		// extra edge beams on or off
+		// extra edge beams on or off - only for the first shape
 			if (i == 0) {						
 			ctx.fillStyle = "DarkOrange";
 			
@@ -352,7 +382,6 @@ function drawAllShips() {
             const leftCheckbox = document.getElementById("leftCheckbox");
             const rightCheckbox = document.getElementById("rightCheckbox");
 
-			
 			if (leftCheckbox.checked == false){
 				ctx.fillRect(ship.x * c ,  ships[0].y* c + t_hout* c , t_hout* c, ship.height * c -  t_hout* c);
 			}
@@ -367,10 +396,47 @@ function drawAllShips() {
 			if (topCheckbox.checked == false){
 				ctx.fillRect(ship.x * c  ,  ships[0].y* c +  ship.height * c - t_hout* c, ship.width * c ,t_hout* c);
 			}
-			
 		} 
+
     }
 }
+
+// draw advanced offset
+
+function draw_offsets(){
+
+		ship = ships[0]
+		
+		if (ships.length > 0) {	
+			const topOffset = document.getElementById("offsetTopInput").value;
+			const bottomOffset = document.getElementById("offsetBottomInput").value;
+			const leftOffset = document.getElementById("offsetLeftInput").value;
+			const rightOffset = document.getElementById("offsetRightInput").value;
+			ctx.fillStyle = "rgba(0, 0, 0, 0.3)";		// transparency 50 %
+			//console.log("drawing c offset",topOffset)
+			
+			if (topOffset >0){
+				ctx.fillRect(ship.x * c  ,  ships[0].y* c +  ship.height * c - topOffset* c, ship.width * c , topOffset* c);
+			}
+			
+			if (bottomOffset>0){
+				ctx.fillRect(ship.x * c  ,ships[0].y* c , ship.width * c ,bottomOffset* c);
+			}
+			
+			if (leftOffset>0){
+				ctx.fillRect(ship.x * c ,  ships[0].y* c , leftOffset* c, ship.height * c );
+			}
+			
+			if (rightOffset>0){
+				ctx.fillRect(ship.x * c + ship.width * c - rightOffset *c , ships[0].y* c , rightOffset* c, ship.height * c);
+			}
+		}
+}
+
+
+
+
+
 
 // drawing each ship
 function drawShip(ship) {
@@ -399,7 +465,6 @@ function draw_panel_connections(){
 		} 
 		
 		
-
 		if ( ships.length > 1  ){
 			//iterating all opening to check a distance between them
 			for (var i = 0; i < ships.length; i++) {
@@ -407,6 +472,7 @@ function draw_panel_connections(){
 			
 				// distance between the edge and the 1st opening
 				if (i==0){
+					dist = ships[i+1].x  - ships[i].x - t_hout;
 					dist = ships[i+1].x  - ships[i].x - t_hout;
 					drawSingleConnector(dist, fillColorConnector, ships[0].x * c);
 				}
@@ -431,12 +497,19 @@ function draw_panel_connections(){
 function drawSingleConnector(distance, fillCol, origin){
 	//determinign how much bars are needed	
 	connecting_bars = Math.floor(distance/b_panel);
+	
+	const t_connector = document.getElementById("connectorThicknessInput").value;
+	
+	var t_connector_hout_ratio = t_connector/t_hout
+	
+	console.log("t_connector_hout_ratio",t_connector_hout_ratio,t_hout)
 
 	for (var e = 0; e < connecting_bars; e++)      {
 		ctx.fillStyle = fillCol;
 		ctx.fillRect(origin + b_panel * (e+1) * c, 
-		ships[0].y * c+ t_hout * c, t_hout * 2 * c, ships[0].height * c- t_hout *2 * c);
+		ships[0].y * c+ t_hout * c, t_hout *t_connector_hout_ratio * c, ships[0].height * c- t_hout *2 * c);
 	}
+	
 	
 	//console.log("v1.1",t_connecting_bar *2* c)
 }
@@ -470,6 +543,7 @@ function handleMouseUp(e) {
 	//console.log("m up")
 	
 	draw_panel_connections();
+	draw_offsets();
 	updateTableAfterMove();
 	UpdateResults();
 	
@@ -547,6 +621,7 @@ function UpdateResults() {
 	t_hout = bot_round_num;
 	drawAllShips();
 	draw_panel_connections();
+	draw_offsets();
 
 	var canvas = document.getElementById("canvas");
 	var greenPixels = countPixelsByColor(canvas, "DarkSeaGreen");
@@ -566,6 +641,7 @@ function UpdateResults() {
 	t_hout = top_round_num;
 	drawAllShips();
 	draw_panel_connections();
+	draw_offsets();
 	
 	orangePixels = countPixelsByColor(canvas, "DarkOrange");	
 	var goldPixels_top = countPixelsByColor(canvas, "gold");
