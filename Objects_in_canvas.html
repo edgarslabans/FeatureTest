@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <p style="font-size: 25px;"><b>Simple timber volume v 1.1</b></p>
+    <p style="font-size: 25px;"><b>Simple timber volume v 1.2 </b></p>
 
     <div style="margin-bottom: 20px;">
         Panel width:
@@ -23,7 +23,7 @@
         <input type="number" id="woodThicknessInput" value="44" onchange="updateProjectProperties()">
 		
 		 Connector thickness:
-        <input type="number" id="connectorThicknessInput" value="44" onchange="updateProjectProperties()">
+        <input type="number" id="connectorThicknessInput" value="88" onchange="updateProjectProperties()">
     </div>
 
 	
@@ -90,6 +90,7 @@
     </table>
 
     <button onclick="add_opening()">Add opening</button>
+	<button onclick="draw_panel_connections()">Redraw</button>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
@@ -117,7 +118,7 @@ var t_hout = 44 // thickness of the wood elements
 var b_panel = 1000 // width of the panel
 
  // thickness of the connecting element between panels
-var t_connecting_bar = 44  // <--temp disabled
+var t_connector = 88  // <--temp disabled
 	    
 
 var txt = document.getElementById("demo");
@@ -177,7 +178,8 @@ function add_opening(){
 function updateProjectProperties() {
     b_panel = parseInt(document.getElementById("panelWidthInput").value) || 0;
     t_hout = parseInt(document.getElementById("woodThicknessInput").value) || 0;
-	
+	t_connector = parseInt(document.getElementById("connectorThicknessInput").value) || 0;
+
     drawAllShips();
     draw_panel_connections();
 	draw_offsets();
@@ -473,7 +475,6 @@ function draw_panel_connections(){
 				// distance between the edge and the 1st opening
 				if (i==0){
 					dist = ships[i+1].x  - ships[i].x - t_hout;
-					dist = ships[i+1].x  - ships[i].x - t_hout;
 					drawSingleConnector(dist, fillColorConnector, ships[0].x * c);
 				}
 				// distance after the last opening
@@ -489,7 +490,11 @@ function draw_panel_connections(){
 			}
 		// if only one shape is available
 		} else if (ships.length == 1) {
-			drawSingleConnector((ships[0].width-t_hout)*c, fillColorConnector, ships[0].x * c);
+
+			dist = ships[0].width - t_hout;
+			drawSingleConnector(dist, fillColorConnector, ships[0].x * c);
+			
+			
 		}
 }
 
@@ -498,24 +503,13 @@ function drawSingleConnector(distance, fillCol, origin){
 	//determinign how much bars are needed	
 	connecting_bars = Math.floor(distance/b_panel);
 	
-	const t_connector = document.getElementById("connectorThicknessInput").value;
-	
-	var t_connector_hout_ratio = t_connector/t_hout
-	
-	console.log("t_connector_hout_ratio",t_connector_hout_ratio,t_hout)
-
 	for (var e = 0; e < connecting_bars; e++)      {
 		ctx.fillStyle = fillCol;
 		ctx.fillRect(origin + b_panel * (e+1) * c, 
-		ships[0].y * c+ t_hout * c, t_hout *t_connector_hout_ratio * c, ships[0].height * c- t_hout *2 * c);
+		ships[0].y * c + t_hout * c, t_connector* c, ships[0].height * c- t_hout *2 * c);
 	}
-	
-	
-	//console.log("v1.1",t_connecting_bar *2* c)
+	//t_connector
 }
-
-
-
 
 
 // ========================== MOUSE MOVEMENT =============================
@@ -605,20 +599,28 @@ function handleMouseMove(e) {
 function UpdateResults() {
 
 	var t_hout_old = t_hout; // saving initial thickness to return it back
+	var t_connector_old = t_connector	
 	
 	var mm_per_pix = 1/c;	
-	var bot_round_num = Math.floor(t_hout/mm_per_pix)*mm_per_pix;
-	var top_round_num = bot_round_num + mm_per_pix;
-	var dikte_pos_in_pixel = (t_hout-bot_round_num)/ mm_per_pix;
+	
+	var bot_round_num = Math.floor(t_hout/mm_per_pix)*mm_per_pix;		// thickness corresponding to lower num of full pixels
+	var top_round_num = bot_round_num + mm_per_pix;						// thickness corresponding to higher num of full pixels
+	var dikte_pos_in_pixel = (t_hout-bot_round_num)/ mm_per_pix;		// potion of the edge inside single pixel
+	
+	//block for connector bar
+	var bot_round_num_c = Math.floor(t_connector/mm_per_pix)*mm_per_pix;
+	var top_round_num_c = bot_round_num_c + mm_per_pix;
+	var dikte_pos_in_pixel_c  = (t_connector-bot_round_num_c)/ mm_per_pix;
 	
 	
-	pixels_per_regel = Math.round(t_hout/mm_per_pix);
-	t_hout_approx = pixels_per_regel * mm_per_pix;
-	mm_pix_correctie_factor = t_hout_approx/t_hout;
+	//mm_pix_correctie_factor = bot_round_num/t_hout;					// correction factor
 	
+		
 	// calculate result at the lowest round thickness 
-	
 	t_hout = bot_round_num;
+	t_connector = bot_round_num_c;
+	
+	
 	drawAllShips();
 	draw_panel_connections();
 	draw_offsets();
@@ -627,37 +629,42 @@ function UpdateResults() {
 	var greenPixels = countPixelsByColor(canvas, "DarkSeaGreen");
 	var orangePixels = countPixelsByColor(canvas, "DarkOrange");
 	var goldPixels = countPixelsByColor(canvas, "gold");
-	var edgeOpeningPixels = countPixelsByColor(canvas, "LightSalmon");
-	var openingPixels = countPixelsByColor(canvas, "ivory");
-	
-	var total_pix = greenPixels + orangePixels+ edgeOpeningPixels + goldPixels
-	rez_percentage = (orangePixels/total_pix)*100;
-	
-	var rez_bot = rez_percentage;
-	
 
+	var total_pix = greenPixels + orangePixels + goldPixels
+	
+	var rez_bot = (orangePixels/total_pix)*100;
+	var rez_bot_c = (goldPixels/total_pix)*100;
+
+	
+	
 	// calculate result at the highest round thickness 
 	
 	t_hout = top_round_num;
+	t_connector = top_round_num_c;
+	
 	drawAllShips();
 	draw_panel_connections();
 	draw_offsets();
 	
 	orangePixels = countPixelsByColor(canvas, "DarkOrange");	
-	var goldPixels_top = countPixelsByColor(canvas, "gold");
-	rez_percentage = (orangePixels/total_pix)*100;				// <-- update of the rest of the pixels skipped
+	goldPixels_top = countPixelsByColor(canvas, "gold");
 	
-	var rez_top = rez_percentage;
+	var rez_top = (orangePixels/total_pix)*100;				// <-- update of the rest of the pixels skipped
+	var rez_top_c = (goldPixels/total_pix)*100;
+
 	
 	var finaal_rez = rez_bot + (rez_top - rez_bot) * dikte_pos_in_pixel;
-	var finaal_rez_connectors = ((goldPixels + (goldPixels_top - goldPixels) * dikte_pos_in_pixel)/total_pix) * 100 ;
+	var finaal_rez_connectors = rez_bot_c + (rez_top_c - rez_bot_c) * dikte_pos_in_pixel_c;
 
 	// returning initial wood thickness
 	t_hout = t_hout_old
+	t_connector = t_connector_old
+	
+	var final_orange_gold = finaal_rez + finaal_rez_connectors
 	
 	
 	if (goldPixels > 0) {
-		document.getElementById("main_rez").innerHTML = " Percentage: "+ (finaal_rez+ finaal_rez_connectors).toFixed(2) + " %" + " ( " + (finaal_rez).toFixed(2) + " % + "+ (finaal_rez_connectors).toFixed(2) + " %)"  ;
+		document.getElementById("main_rez").innerHTML = " Percentage: "+ (final_orange_gold).toFixed(2) + " %" + " ( " + (finaal_rez).toFixed(2) + " % + "+ (finaal_rez_connectors).toFixed(2) + " %)"  ;
 	} else {
 	
 	document.getElementById("main_rez").innerHTML = " Percentage: "+ (finaal_rez).toFixed(2) + " %";
