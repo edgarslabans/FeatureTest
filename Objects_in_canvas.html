@@ -73,9 +73,8 @@
 	</div>
 	
 	
-	
-
-    <canvas id="canvas" width=600 height=400></canvas>
+    <canvas id="canvas_legend" width=600 height=50></canvas>
+	<canvas id="canvas" width=600 height=400></canvas>
 
     <table id="myTable" class="table table-bordered">
         <thead class="thead-light">
@@ -98,7 +97,9 @@
     <script type="text/javascript">
   
 const canvas = document.getElementById("canvas");
+const canvas2 = document.getElementById("canvas_legend");
 let ctx = canvas.getContext("2d");
+let ctx2 = canvas2.getContext("2d");
 ctx.strokeStyle = "lightgray";
 
 
@@ -127,6 +128,11 @@ var c = 0.1  // scale coef to fit shape in canvas
 
 let typingTimeout;		// typing tymeout
 var rez_percentage = 66;
+
+// GLBAL VARIABLES
+var final_orange_gold = 0
+
+
 
 // inverting canvas Y coordinate
 ctx.translate(0, canvas.height);
@@ -349,10 +355,88 @@ function makeShip(x, y, width, height, fill, movable) {
 
 // ========================== DRAWING =============================
 
+function draw_legend(){
+
+	ctx2.clearRect(0, 0, canvas.width, canvas.height);
+	
+	var t_total_leg = 200
+	var t_face_leg = 30
+	var b_leg = 200
+	var t_hout_leg = t_hout
+	var t_connector_leg = t_connector
+	
+
+	var offset_x = 10
+	var offset_y = 5
+	var spacing = 150
+	
+	var scale_leg = 0.2
+	
+	
+	// 1 
+	ctx2.fillStyle = "DarkSeaGreen";
+	ctx2.fillRect(offset_x , offset_y, b_leg * scale_leg, t_face_leg * scale_leg  );
+	ctx2.fillRect(offset_x , offset_y+ (t_total_leg-t_face_leg) *scale_leg , b_leg * scale_leg, t_face_leg * scale_leg  );
+	
+	ctx2.fillStyle = "grey";
+	ctx2.fillRect(offset_x , offset_y + (t_face_leg) *scale_leg , b_leg * scale_leg, (t_total_leg-t_face_leg*2) * scale_leg  );
+	
+	//2
+	ctx2.fillStyle = "DarkSeaGreen";
+	ctx2.fillRect(offset_x + spacing, offset_y, b_leg * scale_leg, t_face_leg * scale_leg  );
+	ctx2.fillRect(offset_x + spacing, offset_y+ (t_total_leg-t_face_leg) *scale_leg , b_leg * scale_leg, t_face_leg * scale_leg  );
+	
+	ctx2.fillStyle = "grey";
+	ctx2.fillRect(offset_x + spacing, offset_y + (t_face_leg) *scale_leg , b_leg * scale_leg, (t_total_leg-t_face_leg*2) * scale_leg  );
+	
+	ctx2.fillStyle = "black";	// dividing line
+	ctx2.fillRect(offset_x + spacing + (b_leg/2 ) * scale_leg, offset_y , 1 , t_total_leg * scale_leg  );
+	
+	
+	ctx2.fillStyle = "DarkOrange";
+	ctx2.fillRect(offset_x + spacing + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y + (t_face_leg) *scale_leg, t_hout_leg * scale_leg, (t_total_leg-t_face_leg*2) * scale_leg  );
+	
+	
+	//3
+	
+	ctx2.fillStyle = "DarkSeaGreen";
+	ctx2.fillRect(offset_x + spacing*2, offset_y, b_leg * scale_leg, t_face_leg * scale_leg  );
+	ctx2.fillRect(offset_x + spacing*2, offset_y+ (t_total_leg-t_face_leg) *scale_leg , b_leg * scale_leg, t_face_leg * scale_leg  );
+	
+	ctx2.fillStyle = "grey";
+	ctx2.fillRect(offset_x + spacing*2, offset_y + (t_face_leg) *scale_leg , b_leg * scale_leg, (t_total_leg-t_face_leg*2) * scale_leg  );
+	
+	ctx2.fillStyle = "black";
+	ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 ) * scale_leg, offset_y , 1 , t_total_leg * scale_leg  );
+	
+	
+	
+	ctx2.fillStyle = "gold";
+	ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y + (t_face_leg) *scale_leg, t_hout_leg * scale_leg, t_connector_leg*0.5 * scale_leg  );
+	ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y+ (t_total_leg-t_face_leg-t_connector_leg*0.5) *scale_leg, t_hout_leg * scale_leg, t_connector_leg*0.5 * scale_leg  );
+	
+	// text
+	
+	   // Set font and text properties
+	ctx2.font = '50px Arial';
+	ctx2.fillStyle = 'blue';
+	ctx2.textAlign = 'center'; // Align text to the center
+
+	// Add text to the canvas
+	ctx2.fillText(final_orange_gold.toFixed(2) + " %" , 100, 50);
+	
+	
+	
+	
+	
+}
+
+
+
 // drawing all objects in canvas
 function drawAllShips() {
 
-
+	
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < ships.length; i++) {
         var ship = ships[i]
@@ -401,6 +485,7 @@ function drawAllShips() {
 		} 
 
     }
+	draw_legend();
 }
 
 // draw advanced offset
@@ -660,7 +745,9 @@ function UpdateResults() {
 	t_hout = t_hout_old
 	t_connector = t_connector_old
 	
-	var final_orange_gold = finaal_rez + finaal_rez_connectors
+	final_orange_gold = finaal_rez + finaal_rez_connectors
+	
+	console.log("rez_bot", rez_bot,"rez_bot_c", rez_bot_c,"rez_top", rez_top, "rez_top_c", rez_top_c )
 	
 	
 	if (goldPixels > 0) {
