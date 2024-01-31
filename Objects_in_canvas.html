@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Timber Volume</title>
     <style>
-        body,table{background-color:#fff}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:20px;margin:0}canvas{border:1px solid grey;max-width:100%;height:auto;display:block;margin:20px 0}table{width:100%;max-width:800px;margin-top:20px;border-collapse:collapse;margin-bottom:20px}td,th{border:1px solid #dee2e6;padding:8px;text-align:center}th{background-color:#f8f9fa}button{background-color:#007bff;color:#fff;border:none;padding:10px 20px;cursor:pointer;border-radius:4px;margin-right:10px;margin-bottom:10px}button:hover{background-color:#0056b3}input[type=number]{width:80px;padding:5px;margin-right:10px}
+        body,table{background-color:#fff}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:20px;margin:0}canvas{border:1px gray;max-width:100%;height:auto;display:block;margin:20px 0}table{width:100%;max-width:800px;margin-top:20px;border-collapse:collapse;margin-bottom:20px}td,th{border:1px solid #dee2e6;padding:8px;text-align:center}th{background-color:#f8f9fa}button{background-color:#007bff;color:#fff;border:none;padding:10px 20px;cursor:pointer;border-radius:4px;margin-right:10px;margin-bottom:10px}button:hover{background-color:#0056b3}input[type=number]{width:80px;padding:5px;margin-right:10px}
     </style>
 </head>
 
@@ -131,6 +131,8 @@ var rez_percentage = 66;
 
 // GLBAL VARIABLES
 var final_orange_gold = 0
+var finaal_rez = 0
+var finaal_rez_connectors = 0
 
 
 
@@ -368,7 +370,7 @@ function draw_legend(){
 
 	var offset_x = 10
 	var offset_y = 5
-	var spacing = 150
+	var spacing = 180
 	
 	var scale_leg = 0.2
 	
@@ -398,36 +400,42 @@ function draw_legend(){
 	
 	
 	//3
+	if (finaal_rez_connectors > 0) { 
+		ctx2.fillStyle = "DarkSeaGreen";
+		ctx2.fillRect(offset_x + spacing*2, offset_y, b_leg * scale_leg, t_face_leg * scale_leg  );
+		ctx2.fillRect(offset_x + spacing*2, offset_y+ (t_total_leg-t_face_leg) *scale_leg , b_leg * scale_leg, t_face_leg * scale_leg  );
+		
+		ctx2.fillStyle = "grey";
+		ctx2.fillRect(offset_x + spacing*2, offset_y + (t_face_leg) *scale_leg , b_leg * scale_leg, (t_total_leg-t_face_leg*2) * scale_leg  );
+		
+		ctx2.fillStyle = "black";
+		ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 ) * scale_leg, offset_y , 1 , t_total_leg * scale_leg  );
+		
+		
+		ctx2.fillStyle = "gold";
+		ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y + (t_face_leg) *scale_leg, t_hout_leg * scale_leg, t_connector_leg*0.5 * scale_leg  );
+		ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y+ (t_total_leg-t_face_leg-t_connector_leg*0.5) *scale_leg, t_hout_leg * scale_leg, t_connector_leg*0.5 * scale_leg  );
 	
-	ctx2.fillStyle = "DarkSeaGreen";
-	ctx2.fillRect(offset_x + spacing*2, offset_y, b_leg * scale_leg, t_face_leg * scale_leg  );
-	ctx2.fillRect(offset_x + spacing*2, offset_y+ (t_total_leg-t_face_leg) *scale_leg , b_leg * scale_leg, t_face_leg * scale_leg  );
-	
-	ctx2.fillStyle = "grey";
-	ctx2.fillRect(offset_x + spacing*2, offset_y + (t_face_leg) *scale_leg , b_leg * scale_leg, (t_total_leg-t_face_leg*2) * scale_leg  );
-	
-	ctx2.fillStyle = "black";
-	ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 ) * scale_leg, offset_y , 1 , t_total_leg * scale_leg  );
-	
-	
-	
-	ctx2.fillStyle = "gold";
-	ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y + (t_face_leg) *scale_leg, t_hout_leg * scale_leg, t_connector_leg*0.5 * scale_leg  );
-	ctx2.fillRect(offset_x + spacing*2 + (b_leg/2 - t_hout_leg/2) * scale_leg , offset_y+ (t_total_leg-t_face_leg-t_connector_leg*0.5) *scale_leg, t_hout_leg * scale_leg, t_connector_leg*0.5 * scale_leg  );
+	}
 	
 	// text
 	
 	   // Set font and text properties
-	ctx2.font = '50px Arial';
+	ctx2.font = '30px Arial';
 	ctx2.fillStyle = 'blue';
 	ctx2.textAlign = 'center'; // Align text to the center
 
 	// Add text to the canvas
-	ctx2.fillText(final_orange_gold.toFixed(2) + " %" , 100, 50);
-	
-	
-	
-	
+
+	if (finaal_rez_connectors > 0) { 
+
+		ctx2.fillText((100-finaal_rez - finaal_rez_connectors).toFixed(2) + "%" , 110, 35);
+		ctx2.fillText(finaal_rez.toFixed(2) + " %" , 290, 35);
+		ctx2.fillText(finaal_rez_connectors.toFixed(2) + " %" , 470, 35);
+	} else {
+		ctx2.fillText((100-finaal_rez ).toFixed(2) + "%" , 110, 35);
+		ctx2.fillText(finaal_rez.toFixed(2) + " %" , 290, 35);
+	}
 	
 }
 
@@ -519,8 +527,6 @@ function draw_offsets(){
 			}
 		}
 }
-
-
 
 
 
@@ -738,8 +744,8 @@ function UpdateResults() {
 	var rez_top_c = (goldPixels/total_pix)*100;
 
 	
-	var finaal_rez = rez_bot + (rez_top - rez_bot) * dikte_pos_in_pixel;
-	var finaal_rez_connectors = rez_bot_c + (rez_top_c - rez_bot_c) * dikte_pos_in_pixel_c;
+	finaal_rez = rez_bot + (rez_top - rez_bot) * dikte_pos_in_pixel;
+	finaal_rez_connectors = rez_bot_c + (rez_top_c - rez_bot_c) * dikte_pos_in_pixel_c;
 
 	// returning initial wood thickness
 	t_hout = t_hout_old
@@ -751,12 +757,13 @@ function UpdateResults() {
 	
 	
 	if (goldPixels > 0) {
-		document.getElementById("main_rez").innerHTML = " Percentage: "+ (final_orange_gold).toFixed(2) + " %" + " ( " + (finaal_rez).toFixed(2) + " % + "+ (finaal_rez_connectors).toFixed(2) + " %)"  ;
+		document.getElementById("main_rez").innerHTML = " Percentage: "+ (final_orange_gold).toFixed(2) + " %" + " ( " + (finaal_rez).toFixed(2) + " % + "+ (finaal_rez_connectors).toFixed(2) + " %)" ;
 	} else {
 	
 	document.getElementById("main_rez").innerHTML = " Percentage: "+ (finaal_rez).toFixed(2) + " %";
 	}
-
+	
+	draw_legend();
 }
 
 
